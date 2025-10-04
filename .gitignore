@@ -1,2 +1,7 @@
 *.vscode/*
+
+# Ignore build files
+*.o
 *.exe
+*.out
+*.obj
