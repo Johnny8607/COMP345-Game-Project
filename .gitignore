@@ -1,7 +1,10 @@
-*.vscode/*
+.vscode/
 
 # Ignore build files
 *.o
 *.exe
 *.out
 *.obj
+
+# Ignore executable
+warzone 
