@@ -1,0 +1,67 @@
+#include "Hand.h"
+#include <algorithm>
+
+// default constructor
+Hand::Hand() {
+    cards = new std::vector<Card*>();
+}
+
+// copy constructor
+Hand::Hand(const Hand& other) {
+    cards = new std::vector<Card*>();
+    for (auto card : *other.cards) {
+        cards->push_back(new Card(*card));
+    }
+}
+
+// assignment constructor
+Hand& Hand::operator=(const Hand& other) {
+    if (this != &other) {
+        for (auto card : *cards) {
+            delete card;
+        }
+        delete cards;
+
+        cards = new std::vector<Card*>();
+        for (auto card: *other.cards) {
+            cards->push_back(new Card(*card));
+        }
+    }
+    return *this;
+}
+
+// destructor
+Hand::~Hand() {
+    for (auto card: *cards) {
+        delete card;
+    }
+    delete cards;
+}
+
+int Hand::size() const {
+    return cards->size();
+}
+
+void Hand::addCard(Card* card) {
+    cards->push_back(card);
+}
+
+void Hand::removeCard(Card * card) {
+    auto cardToRemove = std::find(cards->begin(), cards->end(), card);
+    if (cardToRemove != cards->end()) {
+        delete *cardToRemove;
+        cards->erase(cardToRemove);
+    }
+}
+
+std::vector<Card*>& Hand::getAllCards() const {
+    return *cards;
+}
+
+std::ostream & operator<<(std::ostream & os, const Hand & hand) {
+   os << "Cards in hand " << hand.size() << "\n";
+   for (Card* card : hand.getAllCards()) {
+    os << "-" << *card << "\n" ; 
+   }
+   return os;
+}
