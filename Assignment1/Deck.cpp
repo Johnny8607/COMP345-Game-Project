@@ -58,9 +58,9 @@ Card *Deck::draw() {
     std::random_device random_device;
     std::mt19937 gen(random_device());
     std::uniform_int_distribution<> dis(0, cards->size() - 1);
+    int randomNumber = dis(gen);
 
     // use random number to draw a random card
-    int randomNumber = dis(gen);
     Card* cardDrawn = cards->at(randomNumber);
     cards->erase(cards->begin() + randomNumber);
 
