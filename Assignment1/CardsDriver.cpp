@@ -40,8 +40,3 @@ void testCards() {
     cout << "\nDeck after playing all cards:\n" << deck << endl;
     cout << "Hand after playing all cards:\n" << hand << endl;
 }
-
-int main() {
-    testCards();
-    return 0;
-}
