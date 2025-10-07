@@ -3,6 +3,7 @@
 void testLoadMaps();
 void testCards();
 void testGameStates();
+void testOrdersLists();
 
 void pressEnterToContinue() {
     std::cout << "Press Enter to continue...";
@@ -31,7 +32,7 @@ int main()
     std::cout << "Testing Part 3: Orders List" << std::endl;
     std::cout << "==============================\n"
               << std::endl;
-    // testOrdersLists();
+    testOrdersLists();
     pressEnterToContinue();
 
     std::cout << "Testing Part 4: Cards deck/hand" << std::endl;

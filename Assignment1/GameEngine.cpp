@@ -1,5 +1,6 @@
 #include "GameEngine.h"
 #include <iostream>
+#include <algorithm>
 
 /**
  * Default constructor - initializes game engine to "start" state
