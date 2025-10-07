@@ -74,15 +74,3 @@ void testLoadMaps() {
         map = nullptr;
     }
 }
-
-/**
- * @brief Main entry point.
- *
- * Runs the test function to verify map loading and validation.
- * 
- * @return Exit code (0 = success).
- */
-int main() {
-    testLoadMaps();
-    return 0;
-}
