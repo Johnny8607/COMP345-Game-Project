@@ -1,4 +1,6 @@
 #include "Cards.h"
+#include "Orders.h"
+#include "Player.h"
 
 // default constructor
 Card::Card(CardType type) {
@@ -29,9 +31,26 @@ CardType Card::getType() const {
     return *type;
 }
 
-void Card::play() {
+std::string Card::toString() {
+    switch (this->getType()) {
+        case CardType::Bomb: return "bomb";
+        case CardType::Reinforcement: return "deploy";
+        case CardType::Blockade: return "blockade";
+        case CardType::Airlift: return "airlift"; 
+        case CardType::Diplomacy: return "negotiate";
+        default: return "unknown";
+    }
+}
+
+void Card::play(Player* player) {
     std::cout << "playing card => " << getType() << std::endl;
-    // TODO creates an order and adds it to the player list
+    
+    OrderFactory factory;
+    Order* order = factory.createOrder(this->toString());
+
+    if (order) {
+        player->addOrder(order);
+    }
 }
 
 // stream insertion operator for CardType

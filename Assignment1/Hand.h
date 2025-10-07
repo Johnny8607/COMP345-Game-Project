@@ -4,8 +4,8 @@
 #include <iostream>
 #include <random>
 #include <vector>
-#include "Cards.h"
-#include "Deck.h"
+
+class Card;
 
 class Hand {
     private:
@@ -24,7 +24,6 @@ class Hand {
         int size() const;
         void addCard(Card* card);
         void removeCard(Card* card);
-        void playCard(Deck* deck);
         std::vector<Card*>& getAllCards() const;
     };
 

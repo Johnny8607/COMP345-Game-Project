@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+class Player;
+
 enum class CardType {
     Bomb, 
     Reinforcement, 
@@ -26,8 +28,9 @@ class Card {
         ~Card();
 
         CardType getType() const;
+        std::string toString();
 
-        void play();
+        void play(Player* player);
     };
 
     // stream insertion operator for CardType

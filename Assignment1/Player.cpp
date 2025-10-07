@@ -70,8 +70,36 @@ Hand* Player::getHand() const {
     return hand;
 }
 
+void Player::addOrder(Order *order) {
+    // do nothing if order is null
+    if (!order) {
+        return;
+    } 
+    orders->addOrder(order);
+}
+
 OrdersList* Player::getOrders() const {
     return orders;
+}
+
+void Player::playCard(Deck *deck) {
+    auto& cards = hand->getAllCards();
+
+    if (cards.empty()) {
+        return;
+    }
+
+    // random device generator used to get a random number
+    std::random_device random_device;
+    std::mt19937 gen(random_device());
+    std::uniform_int_distribution<> dis(0, cards.size() - 1);
+    int randomNumber = dis(gen);
+
+    // use random number to play a random card
+    Card* card = cards.at(randomNumber);
+    card->play(this);
+    hand->removeCard(card);
+    deck->addCard(card);
 }
 
 // Add territory pointer if not null to vector pointing to player territories

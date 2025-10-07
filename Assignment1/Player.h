@@ -12,6 +12,7 @@
 #include "Map.h"
 #include "Orders.h"
 #include "Hand.h"
+#include "Deck.h"
 
 // Player class following the Rule of Three for careful memory management
 class Player { 
@@ -28,7 +29,9 @@ public:
     std::string getName() const; // Get player name
     std::vector<Territory*>* getTerritories() const; // Pointer to territories vector for player
     Hand* getHand() const; // Pointer to player's hand cards
+    void addOrder(Order* order); // Function to add a new order to player's order list
     OrdersList* getOrders() const; // Pointer to player's orders list
+    void playCard(Deck* deck);
 
     // Add territory pointer to player's territory list
     void addTerritory(Territory* territory);

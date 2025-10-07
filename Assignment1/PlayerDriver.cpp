@@ -109,8 +109,3 @@ void testPlayers() {
     delete t7;
     delete t8;
 }
-
-int main() {
-    cout << "testing main" << endl;
-    return 0;
-}
