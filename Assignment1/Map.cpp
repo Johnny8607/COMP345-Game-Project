@@ -12,14 +12,18 @@
 // Territory Implementation
 // ================================
 
+// Constructor: initializes a new Territory with a given name
+// Default armies = 0, owner and continent set to nullptr, and adjacency list created.
 Territory::Territory(const std::string& name) 
     : name(name), armies(new int(0)), owner(nullptr), continent(nullptr), 
       adjacentTerritories(new std::vector<Territory*>()) {}
 
+// Copy constructor: deep copies the army count and adjacency list.
 Territory::Territory(const Territory& other)
     : name(other.name), armies(new int(*other.armies)), owner(other.owner), continent(other.continent),
       adjacentTerritories(new std::vector<Territory*>(*other.adjacentTerritories)) {}
 
+// Assignment operator: performs deep copy for dynamic members.
 Territory& Territory::operator=(const Territory& other) {
     if (this != &other) {
         name = other.name;
@@ -31,22 +35,28 @@ Territory& Territory::operator=(const Territory& other) {
     return *this;
 }
 
+// Destructor: deletes dynamic memory.
 Territory::~Territory() {
     delete armies;
     delete adjacentTerritories;
 }
 
+// Getters
 std::string Territory::getName() const { return name; }
 int Territory::getArmies() const { return *armies; }
 Player* Territory::getOwner() const { return owner; }
 Continent* Territory::getContinent() const { return continent; }
 std::vector<Territory*>* Territory::getAdjacents() const { return adjacentTerritories; }
 
+// Setters
 void Territory::setArmies(int armiesVal) { *armies = armiesVal; }
 void Territory::setOwner(Player* newOwner) { owner = newOwner; }
 void Territory::setContinent(Continent* newContinent) { continent = newContinent; }
+
+// Adds an adjacent (neighboring) territory to the adjacency list.
 void Territory::addAdjacent(Territory* territory) { adjacentTerritories->push_back(territory); }
 
+// Stream output operator: prints basic territory info.
 std::ostream& operator<<(std::ostream& out, const Territory& t) {
     out << "Territory: " << t.name << " (Armies: " << *t.armies << ")";
     return out;
@@ -56,12 +66,15 @@ std::ostream& operator<<(std::ostream& out, const Territory& t) {
 // Continent Implementation
 // ================================
 
+// Constructor: initializes continent name, control value (bonus), and an empty territory list.
 Continent::Continent(const std::string& name, int bonus) 
     : name(name), controlValue(new int(bonus)), territories(new std::vector<Territory*>()) {}
 
+// Copy constructor: deep copies control value and list of territories.
 Continent::Continent(const Continent& other)
     : name(other.name), controlValue(new int(*other.controlValue)), territories(new std::vector<Territory*>(*other.territories)) {}
 
+// Assignment operator: deep copies continent attributes.
 Continent& Continent::operator=(const Continent& other) {
     if (this != &other) {
         name = other.name;
@@ -71,17 +84,21 @@ Continent& Continent::operator=(const Continent& other) {
     return *this;
 }
 
+// Destructor: cleans up dynamic memory.
 Continent::~Continent() {
     delete controlValue;
     delete territories;
 }
 
+// Getters
 std::string Continent::getName() const { return name; }
 int Continent::getControlValue() const { return *controlValue; }
 std::vector<Territory*>* Continent::getTerritories() const { return territories; }
 
+// Adds a territory to this continent.
 void Continent::addTerritory(Territory* t) { territories->push_back(t); }
 
+// Stream output operator for continent info.
 std::ostream& operator<<(std::ostream& out, const Continent& c) {
     out << "Continent: " << c.name << " (Bonus: " << *c.controlValue << ")";
     return out;
@@ -91,9 +108,11 @@ std::ostream& operator<<(std::ostream& out, const Continent& c) {
 // Map Implementation
 // ================================
 
+// Default constructor: initializes empty vectors for continents and territories.
 Map::Map() 
     : continents(new std::vector<Continent*>()), territories(new std::vector<Territory*>()) {}
 
+// Copy constructor: deep copies continents and territories.
 Map::Map(const Map& other)
     : continents(new std::vector<Continent*>()), territories(new std::vector<Territory*>()) {
     for (auto c : *other.continents) {
@@ -104,12 +123,12 @@ Map::Map(const Map& other)
     }
 }
 
+// Assignment operator: clears current data and deep copies from another Map.
 Map& Map::operator=(const Map& other) {
     if (this != &other) {
-        // Delete old pointers
+        // Clean up existing objects
         for (auto c : *continents) delete c;
         for (auto t : *territories) delete t;
-
         continents->clear();
         territories->clear();
 
@@ -120,6 +139,7 @@ Map& Map::operator=(const Map& other) {
     return *this;
 }
 
+// Destructor: deletes all continents and territories.
 Map::~Map() {
     for (auto c : *continents) delete c;
     for (auto t : *territories) delete t;
@@ -127,13 +147,17 @@ Map::~Map() {
     delete territories;
 }
 
+// Getters
 std::vector<Continent*>* Map::getContinents() const { return continents; }
 std::vector<Territory*>* Map::getTerritories() const { return territories; }
 
+// Adders
 void Map::addContinent(Continent* c) { continents->push_back(c); }
 void Map::addTerritory(Territory* t) { territories->push_back(t); }
 
+// Validates that the map is correctly structured.
 bool Map::validate() const {
+    // Must be globally connected, continents internally connected, and no duplicate territories.
     return isConnectedGraph() && areContinentsConnected() && eachTerritoryInOneContinent();
 }
 
@@ -141,6 +165,7 @@ bool Map::validate() const {
 // Helper DFS functions
 // ================================
 
+// Depth-First Search for global map connectivity
 static void dfsTerritory(Territory* start, std::set<Territory*>& visited) {
     std::stack<Territory*> stack;
     stack.push(start);
@@ -149,12 +174,15 @@ static void dfsTerritory(Territory* start, std::set<Territory*>& visited) {
         Territory* current = stack.top(); stack.pop();
         if (visited.find(current) != visited.end()) continue;
         visited.insert(current);
+
+        // Traverse all adjacent territories
         for (auto neighbor : *current->getAdjacents()) {
             if (visited.find(neighbor) == visited.end()) stack.push(neighbor);
         }
     }
 }
 
+// Checks if the entire map is connected
 bool Map::isConnectedGraph() const {
     if (territories->empty()) return false;
     std::set<Territory*> visited;
@@ -162,6 +190,7 @@ bool Map::isConnectedGraph() const {
     return visited.size() == territories->size();
 }
 
+// DFS that only travels through territories in the same continent
 static void dfsContinentTerritory(Territory* start, std::set<Territory*>& visited, Continent* continent) {
     std::stack<Territory*> stack;
     stack.push(start);
@@ -170,6 +199,8 @@ static void dfsContinentTerritory(Territory* start, std::set<Territory*>& visite
         Territory* current = stack.top(); stack.pop();
         if (visited.find(current) != visited.end()) continue;
         visited.insert(current);
+
+        // Only explore neighbors in the same continent
         for (auto neighbor : *current->getAdjacents()) {
             if (neighbor->getContinent() == continent && visited.find(neighbor) == visited.end())
                 stack.push(neighbor);
@@ -177,6 +208,7 @@ static void dfsContinentTerritory(Territory* start, std::set<Territory*>& visite
     }
 }
 
+// Ensures each continent forms a connected subgraph
 bool Map::areContinentsConnected() const {
     for (auto continent : *continents) {
         std::vector<Territory*>* terrs = continent->getTerritories();
@@ -184,24 +216,28 @@ bool Map::areContinentsConnected() const {
 
         std::set<Territory*> visited;
         dfsContinentTerritory(terrs->at(0), visited, continent);
+
+        // If any continent's territories are not all connected, return false
         if (visited.size() != terrs->size()) return false;
     }
     return true;
 }
 
+// Ensures every territory belongs to exactly one continent
 bool Map::eachTerritoryInOneContinent() const {
     std::set<Territory*> allTerritories;
     for (auto continent : *continents) {
         for (auto t : *continent->getTerritories()) {
-            if (!allTerritories.insert(t).second) return false;
+            if (!allTerritories.insert(t).second) return false; // Duplicate detected
         }
     }
     for (auto t : *territories) {
-        if (allTerritories.find(t) == allTerritories.end()) return false;
+        if (allTerritories.find(t) == allTerritories.end()) return false; // Unassigned territory
     }
     return true;
 }
 
+// Prints a summary of the map.
 std::ostream& operator<<(std::ostream& out, const Map& m) {
     out << "Map with " << m.continents->size() << " continents and "
         << m.territories->size() << " territories.";
@@ -212,6 +248,7 @@ std::ostream& operator<<(std::ostream& out, const Map& m) {
 // MapLoader Implementation
 // ================================
 
+// Constructors, assignment, destructor
 MapLoader::MapLoader(const std::string& filename) : filename(filename) {}
 MapLoader::MapLoader(const MapLoader& other) : filename(other.filename) {}
 MapLoader& MapLoader::operator=(const MapLoader& other) {
@@ -220,6 +257,7 @@ MapLoader& MapLoader::operator=(const MapLoader& other) {
 }
 MapLoader::~MapLoader() {}
 
+// Loads and parses a map file into a Map object
 Map* MapLoader::load() {
     std::ifstream file(filename);
     if (!file.is_open()) {
@@ -230,15 +268,16 @@ Map* MapLoader::load() {
     std::string line, section;
     Map* map = new Map();
 
+    // Temporary mappings used while parsing
     std::map<int, Territory*> territoryById;
-    std::map<int, int> territoryToContinentId;  // Maps territory ID to its continent ID
-    std::map<int, Continent*> continentById;    // Maps continent ID to Continent object
-
-    int nextContinentId = 1; // Used to assign IDs to continents in the order they appear
+    std::map<int, int> territoryToContinentId;  // Maps territory ID → continent ID
+    std::map<int, Continent*> continentById;    // Maps continent ID → Continent*
+    int nextContinentId = 1;                    // Assigns sequential IDs to continents
 
     while (std::getline(file, line)) {
-        if (line.empty() || line[0] == ';') continue;
+        if (line.empty() || line[0] == ';') continue; // Skip comments or blank lines
 
+        // Detect section headers like [continents], [countries], [borders]
         if (line[0] == '[') {
             section = line;
             continue;
@@ -246,8 +285,8 @@ Map* MapLoader::load() {
 
         std::istringstream iss(line);
 
+        // Parse continent data
         if (section == "[continents]") {
-            // Format: <continent_name>=<bonus>
             size_t eq = line.find('=');
             if (eq != std::string::npos) {
                 std::string name = line.substr(0, eq);
@@ -258,8 +297,8 @@ Map* MapLoader::load() {
                 continentById[nextContinentId++] = continent;
             }
         }
+        // Parse country (territory) data
         else if (section == "[countries]") {
-            // Format: <id> <country_name> <continent_id> <x> <y>
             int id, continentId, x, y;
             std::string name;
             iss >> id >> name >> continentId >> x >> y;
@@ -269,6 +308,7 @@ Map* MapLoader::load() {
             territoryById[id] = territory;
             territoryToContinentId[id] = continentId;
         }
+        // Parse adjacency (borders) data
         else if (section == "[borders]") {
             int id; iss >> id;
             Territory* from = territoryById[id];
@@ -300,6 +340,7 @@ Map* MapLoader::load() {
     return map;
 }
 
+// Prints basic MapLoader info
 std::ostream& operator<<(std::ostream& out, const MapLoader& ml) {
     out << "MapLoader reading file: " << ml.filename;
     return out;
