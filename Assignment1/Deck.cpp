@@ -1,4 +1,5 @@
 #include "Deck.h"
+#include "Cards.h"
 #include <random>
 #include <algorithm>
 

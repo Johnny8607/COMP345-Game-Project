@@ -1,6 +1,7 @@
 #include <iostream>
 
 void testLoadMaps();
+void testPlayers();
 void testCards();
 void testGameStates();
 void testOrdersLists();
@@ -26,7 +27,7 @@ int main()
     std::cout << "Testing Part 2: Player" << std::endl;
     std::cout << "==============================\n"
               << std::endl;
-    // testPlayers();
+    testPlayers();
     pressEnterToContinue();
 
     std::cout << "Testing Part 3: Orders List" << std::endl;

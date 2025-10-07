@@ -1,4 +1,5 @@
 #include "Hand.h"
+#include "Cards.h"
 #include <algorithm>
 #include <iostream>
 
@@ -52,24 +53,6 @@ void Hand::removeCard(Card * card) {
     if (cardToRemove != cards->end()) {
         cards->erase(cardToRemove);
     }
-}
-
-void Hand::playCard(Deck *deck) {
-    if (cards->empty()) {
-        return;
-    }
-
-    // random device generator used to get a random number
-    std::random_device random_device;
-    std::mt19937 gen(random_device());
-    std::uniform_int_distribution<> dis(0, cards->size() - 1);
-    int randomNumber = dis(gen);
-
-    // use random number to play a random card
-    Card* card = cards->at(randomNumber);
-    card->play();
-    removeCard(card);
-    deck->addCard(card);
 }
 
 std::vector<Card*>& Hand::getAllCards() const {

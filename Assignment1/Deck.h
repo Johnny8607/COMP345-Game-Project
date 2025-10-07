@@ -3,7 +3,8 @@
 
 #include <iostream>
 #include <vector>
-#include "Cards.h"
+
+class Card;
 
 class Deck {
 private:
