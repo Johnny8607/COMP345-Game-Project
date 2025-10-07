@@ -1,0 +1,13 @@
+[continents]
+Asia=5
+Europe=3
+
+[countries]
+1 China 1 0 0
+2 India 1 0 0
+3 China 2 0 0
+
+[borders]
+1 2
+2 1
+3 1
