@@ -1,4 +1,5 @@
 #include <iostream>
+#include "MapDriver.cpp"
 
 void testGameStates();
 
@@ -17,7 +18,7 @@ int main()
     std::cout << "Testing Part 1: Map" << std::endl;
     std::cout << "==============================\n"
               << std::endl;
-    // testLoadMaps();
+    testLoadMaps();
     pressEnterToContinue();
 
     std::cout << "Testing Part 2: Player" << std::endl;
