@@ -1,0 +1,4 @@
+addplayer Alice
+loadmap testmap.txt
+validatemap
+gamestart
