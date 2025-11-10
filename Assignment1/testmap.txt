@@ -1,0 +1,19 @@
+# Valid sequence of commands
+loadmap testmap.txt
+validatemap
+addplayer Alice
+addplayer Bob
+gamestart
+
+# Invalid commands
+test
+hello
+loadmap.txt
+addplayer
+gamestart now
+
+# Another valid sequence after invalid commands
+loadmap testmap.txt
+validatemap
+addplayer Charlie
+gamestart
