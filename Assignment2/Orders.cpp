@@ -334,14 +334,14 @@ void Bomb::execute() const {
 
 // Blockade: doubles armies and transfers ownership to Neutral player
 void Blockade::execute() const { 
-    if (!validate()) return;
+  if (!validate()) return;
+
     target->setArmies(target->getArmies() * 2);
-    if (engine) {
-        target->setOwner(GameEngine::getNeutralPlayer());
-        cout << "Blockade applied to " << target->getName() << ", armies doubled and turned neutral.\n";
-    } else {
-        cout << "Error: No GameEngine context for Neutral player!\n";
-    }
+
+    target->setOwner(GameEngine::getNeutralPlayer());
+
+    cout << "Blockade applied to " << target->getName()
+         << ", armies doubled and territory turned neutral.\n";
 }
 
 // Airlift: moves armies between two player-owned territories ignoring adjacency
