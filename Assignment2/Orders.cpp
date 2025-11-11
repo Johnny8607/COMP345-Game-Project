@@ -106,6 +106,23 @@ void OrdersList::executeOrders() {
 }
 
 /**
+ * Gets the list of orders.
+ */
+const vector<Order*>& OrdersList::getOrders() const {
+    return orders_;
+}
+
+/**
+ * Clears all orders from the list, deleting each one.
+ */
+void OrdersList::clear() {
+    for (auto* o : orders_) {
+        delete o;
+    }
+    orders_.clear();
+}
+
+/**
  * Stream insertion operator for printing the current list of orders.
  * @param out Reference to output stream
  * @param ol Constant reference to the OrdersList to print.

@@ -14,6 +14,13 @@
 #include "Hand.h"
 #include "Deck.h"
 
+// Forward declarations
+class Territory;
+class Hand;
+class OrdersList;
+class Deck;
+class GameEngine;
+
 // Player class following the Rule of Three for careful memory management
 class Player { 
 
@@ -51,6 +58,27 @@ public:
     // Stream insertion for help printing Player object; set as friend to access class private members
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
 
+    // --- NEW FOR A2 PART 3 ---
+
+    /**
+     * @brief The main decision-making method for a player.
+     * This is called repeatedly by the GameEngine.
+     * It must issue ONE order per call, or set its "done" flag.
+     */
+    void issueOrder(GameEngine *game);
+
+    // Getters
+    int getReinforcementPool() const;
+    bool isDoneIssuingOrders() const;
+    bool hasConqueredTerritory() const;
+
+    // Setters
+    void addToReinforcementPool(int armies);
+    void setDoneIssuingOrders(bool done);
+    void setConqueredTerritory(bool conquered);
+
+    // --- END NEW ---
+
 
 private:
 
@@ -61,6 +89,12 @@ private:
     OrdersList* orders;                     // Player's orders list
     int* reinforcementPool;                 // Pointer to reinforcement pool (army units available for deployment)
 
+    // --- NEW FOR A2 PART 3 ---
+    int reinforcementPool;
+    bool DoneIssuingOrders;
+    bool ConqueredTerritoryThisTurn;
+    // --- END NEW ---
+    
     // To delete safely all player object members using dynamic memory
     void clearData();
 
