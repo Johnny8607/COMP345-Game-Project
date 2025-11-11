@@ -7,30 +7,30 @@
 /*
  * Command
  *
- * Represents a single command entered by the user (or read from file) and
- * the effect/result of attempting to execute that command.
- *
- * All function implementations are in Command.cpp.
+ * Represents a single command entered by the user (or read from a file)
+ * and stores the effect/result of executing the command.
  */
 class Command {
 public:
-    // Constructor / Destructor / copy / assign
-    Command(const std::string& command);
+    // Rule of Three
+    explicit Command(const std::string& command);
     Command(const Command& other);
     Command& operator=(const Command& other);
     ~Command();
 
-    // Effect storage
+    // Save the effect of executing the command
     void saveEffect(const std::string& effect);
+
+    // Accessors
     std::string getCommand() const;
     std::string getEffect() const;
 
-    // stream insertion
+    // Stream insertion operator
     friend std::ostream& operator<<(std::ostream& out, const Command& cmd);
 
 private:
-    std::string command;
-    std::string effect;
+    std::string command;  // The command string
+    std::string effect;   // Effect or result after execution
 };
 
 #endif // COMMAND_H
