@@ -56,6 +56,7 @@ public:
 
     std::vector<Player*>& getPlayers();
     Map* getMap();
+    Deck * getDeck() { return deck; }
 
     /**
      * @brief A placeholder for A2 Part 2.
