@@ -96,7 +96,6 @@ OrdersList* Player::getOrders() const {
     return orders;
 }
 
-// --- NEW FOR A2 ---
 // Returns true if this player currently has a ceasefire agreement with `other`.
 bool Player::isCeasefireWith(Player* other) const {
     for (auto* p : ceasefirePlayers)
@@ -125,7 +124,6 @@ bool Player::hasAdjacentTerritory(Territory* target) const {
     }
     return false;
 }
-// --- END ---
 
 void Player::playCard(Deck *deck) {
     auto& cards = hand->getAllCards();

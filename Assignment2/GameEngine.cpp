@@ -15,9 +15,7 @@
 #include "Orders.h"
 #include "GameEngine.h"
 
-// --- NEW FOR A2 ---
 Player* GameEngine::neutralPlayer = nullptr; // Define static member neutralPlayer
-// --- END ---
 
 /**
  * Default constructor - initializes game engine to "start" state
@@ -777,7 +775,6 @@ bool GameEngine::checkWinCondition() {
     // This is the simplest win condition check
     return players.size() == 1;
 }
-// --- NEW FOR A2 ---
 
 /**
  * Returns the singleton instance of the Neutral Player.
@@ -814,8 +811,6 @@ void GameEngine::addPlayer(Player* player) {
     if (player)
         players.push_back(player);
 }
-// --- END ---
-
 
 void GameEngine::simulateStartup()
 {

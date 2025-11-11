@@ -77,9 +77,7 @@ private:
     std::string currentState;
     Map* map;
     Deck* deck;
-    // --- NEW FOR A2 ---
     static Player* neutralPlayer;        // -- Neutral player pointer
-    // --- END NEW ---
     std::vector<Player*> players;
     /**
      * Transitions the game engine to a new state
