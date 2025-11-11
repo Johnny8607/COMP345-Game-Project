@@ -37,10 +37,10 @@ int main()
     testPlayers();
     pressEnterToContinue();
 
-    std::cout << "Testing Part 4: Orders Execution" << std::endl;
+    std::cout << "Testing Part 3: Orders List" << std::endl;
     std::cout << "==============================\n"
               << std::endl;
-    testOrderExecution();
+    testOrdersLists();
     pressEnterToContinue();
 
     std::cout << "Testing Part 4: Cards deck/hand" << std::endl;
@@ -75,6 +75,12 @@ int main()
     std::cout << "==============================\n"
               << std::endl;
     testMainGameLoop();
+    pressEnterToContinue();
+
+     std::cout << "Testing Assignment 2 Part 4: Order Execution" << std::endl;
+    std::cout << "==============================\n"
+              << std::endl;
+    testOrderExecution();
     pressEnterToContinue();
 
     return 0;
