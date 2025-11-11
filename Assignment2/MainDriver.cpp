@@ -1,12 +1,11 @@
 #include <iostream>
-#include "CommandProcessing.h"
-
 
 void testLoadMaps();
 void testPlayers();
 void testCards();
 void testGameStates();
 void testOrdersLists();
+void testCommandProcessor();
 
 void pressEnterToContinue() {
     std::cout << "Press Enter to continue...";
@@ -49,10 +48,10 @@ int main()
               << std::endl;
     testGameStates();
 
-std::cout << "Testing Assignment 2 Part 1: Command Processor" << std::endl;
-std::cout << "==============================\n" << std::endl;
-testCommandProcessor();
-pressEnterToContinue();
+    std::cout << "Testing Assignment 2 Part 1: Command Processor" << std::endl;
+    std::cout << "==============================\n" << std::endl;
+    testCommandProcessor();
+    pressEnterToContinue();
 
     return 0;
 }

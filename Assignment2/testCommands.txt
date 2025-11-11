@@ -1,4 +1,4 @@
 loadmap testmap.txt
 validatemap
-addplayer Alice
+addplayer John
 gamestart

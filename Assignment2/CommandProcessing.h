@@ -61,9 +61,4 @@ private:
     size_t currentIndex;                     // Index of next command
 };
 
-/*
- * Test driver for Part 1
- */
-void testCommandProcessor();
-
 #endif // COMMANDPROCESSING_H

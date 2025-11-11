@@ -173,19 +173,3 @@ std::ostream& operator<<(std::ostream& out, const FileCommandProcessorAdapter& a
         << ", nextIndex=" << adapter.currentIndex << "]";
     return out;
 }
-
-// ================================================================
-// Test Driver Function
-// ================================================================
-void testCommandProcessor() {
-    std::cout << "=== Console Commands Test ===" << std::endl;
-    CommandProcessor consoleProcessor;
-    consoleProcessor.readCommand();
-
-    std::cout << "\n=== File Commands Test ===" << std::endl;
-    FileCommandProcessorAdapter fileProcessor("testCommands.txt");
-
-    while (fileProcessor.hasMoreCommands()) {
-        fileProcessor.readCommandFromFile();
-    }
-}
