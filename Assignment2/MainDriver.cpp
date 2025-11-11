@@ -8,17 +8,20 @@ void testOrdersLists();
 void testMainGameLoop();
 void testCommandProcessor();
 
-void pressEnterToContinue() {
+void pressEnterToContinue()
+{
     std::cout << "Press Enter to continue...";
     std::cin.get();
     std::cout << std::endl;
 }
 
 int main()
-{     
-    std::cout << "\n******************************\n" << std::endl;
+{
+    std::cout << "\n******************************\n"
+              << std::endl;
     std::cout << "=== COMP 345 Assignment 1 ===" << std::endl;
-    std::cout << "\n******************************\n" << std::endl;
+    std::cout << "\n******************************\n"
+              << std::endl;
 
     std::cout << "Testing Part 1: Map" << std::endl;
     std::cout << "==============================\n"
@@ -49,17 +52,22 @@ int main()
               << std::endl;
     testGameStates();
 
-    std::cout << "\n******************************\n" << std::endl;
+    std::cout << "\n******************************\n"
+              << std::endl;
     std::cout << "=== COMP 345 Assignment 2 ===" << std::endl;
-    std::cout << "\n******************************\n" << std::endl;
+    std::cout << "\n******************************\n"
+              << std::endl;
+
+    std::cout << "Testing Assignment 2 Part 1: Command Processor" << std::endl;
+    std::cout << "==============================\n"
+              << std::endl;
+    testCommandProcessor();
+    pressEnterToContinue();
 
     std::cout << "Testing Assignment 2 Part 3: Game play main game loop" << std::endl;
     std::cout << "==============================\n"
               << std::endl;
     testMainGameLoop();
-    std::cout << "Testing Assignment 2 Part 1: Command Processor" << std::endl;
-    std::cout << "==============================\n" << std::endl;
-    testCommandProcessor();
     pressEnterToContinue();
 
     return 0;
