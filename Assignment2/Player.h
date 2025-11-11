@@ -44,6 +44,18 @@ public:
 
     // Order creation and add to OrdersList
     void issueOrder(const std::string& orderType);
+   
+    // Conquer flag: one card per round
+    void setConqueredThisTurn(bool flag);
+    bool hasConqueredThisTurn() const;
+
+    // To negotiate and cease fire
+    bool isCeasefireWith(Player* other) const;
+    void addCeasefire(Player* other);
+    void clearCeasefire();
+
+    // To check the ownership of adjacent territories when issuing bomb order
+    bool hasAdjacentTerritory(Territory* target) const;
 
     // Stream insertion for help printing Player object; set as friend to access class private members
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
@@ -56,6 +68,8 @@ private:
     std::vector<Territory*>* territories;   // Pointer to vector pointers territories of player
     Hand* hand;                             // Player's hand of cards
     OrdersList* orders;                     // Player's orders list
+    bool conqueredThisTurn;                 // Tracks whether this player has conquered at least one territory this turn (for card reward)
+    std::vector<Player*> ceasefirePlayers;  // List of players that this player currently has a ceasefire (cannot attack) with
 
     // To delete safely all player object members using dynamic memory
     void clearData();
