@@ -39,9 +39,6 @@ public:
     void addOrder(Order* order); // Function to add a new order to player's order list
     OrdersList* getOrders() const; // Pointer to player's orders list
     void playCard(Deck* deck);
-    int getReinforcementPool() const; // Get reinforcement pool value
-    void setReinforcementPool(int value); // Set reinforcement pool value
-    void addReinforcementPool(int value); // Add to reinforcement pool
 
     // Add territory pointer to player's territory list
     void addTerritory(Territory* territory);
@@ -55,16 +52,7 @@ public:
     // Order creation and add to OrdersList
     void issueOrder(const std::string& orderType);
 
-    // Stream insertion for help printing Player object; set as friend to access class private members
-    friend std::ostream& operator<<(std::ostream& os, const Player& player);
-
-    // --- NEW FOR A2 PART 3 ---
-
-    /**
-     * @brief The main decision-making method for a player.
-     * This is called repeatedly by the GameEngine.
-     * It must issue ONE order per call, or set its "done" flag.
-     */
+    // The main decision-making method for a player (overloaded version)
     void issueOrder(GameEngine *game);
 
     // Getters
@@ -77,7 +65,8 @@ public:
     void setDoneIssuingOrders(bool done);
     void setConqueredTerritory(bool conquered);
 
-    // --- END NEW ---
+    // Stream insertion for help printing Player object; set as friend to access class private members
+    friend std::ostream& operator<<(std::ostream& os, const Player& player);
 
 
 private:
@@ -87,13 +76,9 @@ private:
     std::vector<Territory*>* territories;   // Pointer to vector pointers territories of player
     Hand* hand;                             // Player's hand of cards
     OrdersList* orders;                     // Player's orders list
-    int* reinforcementPool;                 // Pointer to reinforcement pool (army units available for deployment)
-
-    // --- NEW FOR A2 PART 3 ---
-    int reinforcementPool;
-    bool DoneIssuingOrders;
-    bool ConqueredTerritoryThisTurn;
-    // --- END NEW ---
+    int reinforcementPool;                  // Reinforcement pool (army units available for deployment)
+    bool DoneIssuingOrders;                 // Flag indicating if player is done issuing orders
+    bool ConqueredTerritoryThisTurn;        // Flag indicating if player conquered a territory this turn
     
     // To delete safely all player object members using dynamic memory
     void clearData();

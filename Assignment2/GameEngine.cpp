@@ -522,7 +522,7 @@ void GameEngine::startupPhase()
             // c) Give 50 initial army units to players (in reinforcement pool)
             for (Player* player : players) {
                 if (player) {
-                    player->setReinforcementPool(50);
+                    player->addToReinforcementPool(50);
                     std::cout << "Player " << player->getName() << " receives 50 initial army units." << std::endl;
                 }
             }

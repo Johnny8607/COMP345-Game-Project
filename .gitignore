@@ -7,4 +7,5 @@
 *.obj
 
 # Ignore executable
-warzone 
+warzone
+main
