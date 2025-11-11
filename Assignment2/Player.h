@@ -14,6 +14,13 @@
 #include "Hand.h"
 #include "Deck.h"
 
+// Forward declarations
+class Territory;
+class Hand;
+class OrdersList;
+class Deck;
+class GameEngine;
+
 // Player class following the Rule of Three for careful memory management
 class Player { 
 
@@ -32,9 +39,6 @@ public:
     void addOrder(Order* order); // Function to add a new order to player's order list
     OrdersList* getOrders() const; // Pointer to player's orders list
     void playCard(Deck* deck);
-    int getReinforcementPool() const; // Get reinforcement pool value
-    void setReinforcementPool(int value); // Set reinforcement pool value
-    void addReinforcementPool(int value); // Add to reinforcement pool
 
     // Add territory pointer to player's territory list
     void addTerritory(Territory* territory);
@@ -48,6 +52,19 @@ public:
     // Order creation and add to OrdersList
     void issueOrder(const std::string& orderType);
 
+    // The main decision-making method for a player (overloaded version)
+    void issueOrder(GameEngine *game);
+
+    // Getters
+    int getReinforcementPool() const;
+    bool isDoneIssuingOrders() const;
+    bool hasConqueredTerritory() const;
+
+    // Setters
+    void addToReinforcementPool(int armies);
+    void setDoneIssuingOrders(bool done);
+    void setConqueredTerritory(bool conquered);
+
     // Stream insertion for help printing Player object; set as friend to access class private members
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
 
@@ -59,8 +76,10 @@ private:
     std::vector<Territory*>* territories;   // Pointer to vector pointers territories of player
     Hand* hand;                             // Player's hand of cards
     OrdersList* orders;                     // Player's orders list
-    int* reinforcementPool;                 // Pointer to reinforcement pool (army units available for deployment)
-
+    int reinforcementPool;                  // Reinforcement pool (army units available for deployment)
+    bool DoneIssuingOrders;                 // Flag indicating if player is done issuing orders
+    bool ConqueredTerritoryThisTurn;        // Flag indicating if player conquered a territory this turn
+    
     // To delete safely all player object members using dynamic memory
     void clearData();
 

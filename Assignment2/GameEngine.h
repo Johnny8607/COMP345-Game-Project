@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-// Forward declarations
 class Map;
 class Player;
 class Deck;
@@ -12,12 +11,6 @@ class MapLoader;
 
 class GameEngine
 {
-private:
-    std::string currentState;
-    Map* gameMap;                           // Pointer to the game map
-    std::vector<Player*>* players;          // Pointer to vector of player pointers
-    Deck* deck;                             // Pointer to the game deck
-
 public:
     /**
      * Default constructor - initializes game engine to start state
@@ -61,9 +54,15 @@ public:
      */
     std::string getCurrentState() const;
 
+    // --- NEW: A2 GETTERS ---
+    std::vector<Player*>& getPlayers();
+    Map* getMap();
+    // --- END NEW ---
+
+    // --- NEW FOR A2 ---
     /**
-     * Command-based user interaction for game startup
-     * Involving commands for loadmap, validatemap, addplayer, gamestart
+     * @brief A placeholder for A2 Part 2.
+     * Manually sets up the game state so the main loop can run.
      */
     void startupPhase();
 
@@ -71,10 +70,13 @@ public:
     void reinforcementPhase();
     void issueOrdersPhase();
     void executeOrdersPhase();
-
-    
+    // --- END NEW ---
 
 private:
+    std::string currentState;
+    Map* map;
+    Deck* deck;
+    std::vector<Player*> players;
     /**
      * Transitions the game engine to a new state
      * @param newState The state to transition to
@@ -96,6 +98,18 @@ private:
      * Helper function to randomly shuffle player order
      */
     void shufflePlayerOrder();
+
+    // --- NEW FOR A2 PART 3 (HELPERS) ---
+    /**
+     * @brief Checks if a win condition has been met.
+     */
+    bool checkWinCondition();
+
+    /**
+     * @brief Removes players with no territories from the game.
+     */
+    void removeEliminatedPlayers();
+    // --- END NEW ---
 };
 
 #endif
