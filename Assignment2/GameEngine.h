@@ -2,11 +2,21 @@
 #define GAMEENGINE_H
 
 #include <string>
+#include <vector>
+
+// Forward declarations
+class Map;
+class Player;
+class Deck;
+class MapLoader;
 
 class GameEngine
 {
 private:
     std::string currentState;
+    Map* gameMap;                           // Pointer to the game map
+    std::vector<Player*>* players;          // Pointer to vector of player pointers
+    Deck* deck;                             // Pointer to the game deck
 
 public:
     /**
@@ -51,6 +61,11 @@ public:
      */
     std::string getCurrentState() const;
 
+    /**
+     * Command-based user interaction for game startup
+     * Involving commands for loadmap, validatemap, addplayer, gamestart
+     */
+    void startupPhase();
 
     void mainGameLoop();
     void reinforcementPhase();
@@ -71,6 +86,16 @@ private:
      * @return true if valid, false otherwise
      */
     bool isValidTransition(const std::string &command) const;
+    
+    /**
+     * Helper function that distributes territories fairly among players
+     */
+    void distributeTerritories();
+    
+    /**
+     * Helper function to randomly shuffle player order
+     */
+    void shufflePlayerOrder();
 };
 
 #endif

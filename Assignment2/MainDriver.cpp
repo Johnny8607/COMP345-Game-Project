@@ -6,10 +6,12 @@ void testCards();
 void testGameStates();
 void testOrdersLists();
 void testCommandProcessor();
+void testStartupPhase();
 
 void pressEnterToContinue() {
     std::cout << "Press Enter to continue...";
-    std::cin.get();
+    std::cin.ignore(); // Ignore any leftover characters
+    std::cin.get();    // Wait for Enter key
     std::cout << std::endl;
 }
 
@@ -51,6 +53,11 @@ int main()
     std::cout << "Testing Assignment 2 Part 1: Command Processor" << std::endl;
     std::cout << "==============================\n" << std::endl;
     testCommandProcessor();
+    pressEnterToContinue();
+
+    std::cout << "Testing Assignment 2 Part 2: Game Startup Phase" << std::endl;
+    std::cout << "==============================\n" << std::endl;
+    testStartupPhase();
     pressEnterToContinue();
 
     return 0;
