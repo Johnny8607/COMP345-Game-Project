@@ -82,6 +82,36 @@ OrdersList* Player::getOrders() const {
     return orders;
 }
 
+// Track whether the player conquered at least one territory this turn
+void Player::setConqueredThisTurn(bool flag) { conqueredThisTurn = flag; }
+bool Player::hasConqueredThisTurn() const { return conqueredThisTurn; }
+
+// Ceasefire system: prevent attacks between negotiated players
+bool Player::isCeasefireWith(Player* other) const {
+    for (auto* p : ceasefirePlayers)
+        if (p == other) return true;
+    return false;
+}
+
+void Player::addCeasefire(Player* other) {
+    if (!isCeasefireWith(other))
+        ceasefirePlayers.push_back(other);
+}
+
+void Player::clearCeasefire() {
+    ceasefirePlayers.clear();
+}
+
+
+// Check if this player owns a territory adjacent to the target (used by Bomb Order)
+bool Player::hasAdjacentTerritory(Territory* target) const {
+    for (auto* t : *territories) {
+        if (t->isAdjacentTo(target))
+            return true;
+    }
+    return false;
+}
+                                             
 void Player::playCard(Deck *deck) {
     auto& cards = hand->getAllCards();
 
