@@ -55,6 +55,14 @@ void Territory::setContinent(Continent* newContinent) { continent = newContinent
 
 // Adds an adjacent (neighboring) territory to the adjacency list.
 void Territory::addAdjacent(Territory* territory) { adjacentTerritories->push_back(territory); }
+//Checks if another territory is directly adjacent to this one
+bool Territory::isAdjacentTo(Territory* other) const {
+    if (!other) return false;
+    for (auto* t : *adjacentTerritories) {
+        if (t == other) return true;
+    }
+    return false;
+}
 
 // Stream output operator: prints basic territory info.
 std::ostream& operator<<(std::ostream& out, const Territory& t) {
@@ -154,6 +162,14 @@ std::vector<Territory*>* Map::getTerritories() const { return territories; }
 // Adders
 void Map::addContinent(Continent* c) { continents->push_back(c); }
 void Map::addTerritory(Territory* t) { territories->push_back(t); }
+
+// Finds and returns a territory by its name
+Territory* Map::getTerritoryByName(const std::string& name) const {
+    for (auto* t : *territories) {
+        if (t->getName() == name) return t;
+    }
+    return nullptr;
+}
 
 // Validates that the map is correctly structured.
 bool Map::validate() const {
