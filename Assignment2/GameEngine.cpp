@@ -1,6 +1,10 @@
 #include "GameEngine.h"
 #include <iostream>
 #include <algorithm>
+#include <vector>
+
+// Static global pointer to the Neutral player 
+Player* GameEngine::neutralPlayer = nullptr;
 
 /**
  * Default constructor - initializes game engine to "start" state
@@ -16,6 +20,13 @@ GameEngine::GameEngine() : currentState("start")
 GameEngine::GameEngine(const GameEngine &other) : currentState(other.getCurrentState())
 {
     std::cout << "GameEngine copied." << std::endl;
+    // Deep copy neutral player instead of shared pointer
+    if (other.neutralPlayer)
+        neutralPlayer = new Player(*other.neutralPlayer);
+    else
+        neutralPlayer = nullptr;
+
+    players = other.players;
 }
 
 /**
@@ -24,6 +35,11 @@ GameEngine::GameEngine(const GameEngine &other) : currentState(other.getCurrentS
 GameEngine::~GameEngine()
 {
     std::cout << "GameEngine destroyed." << std::endl;
+    // Safe deletion only once
+    if (neutralPlayer) {
+        delete neutralPlayer;
+        neutralPlayer = nullptr;
+    }
 }
 
 /**
@@ -102,6 +118,8 @@ void GameEngine::processCommand(const std::string &command)
         else if (command == "assigncountries")
         {
             transition("assign reinforcement");
+            // Automatically run reinforcement when entering phase
+            reinforcementPhase();
         }
     }
     else if (currentState == "assign reinforcement")
@@ -131,6 +149,8 @@ void GameEngine::processCommand(const std::string &command)
         else if (command == "endexecorders")
         {
             transition("assign reinforcement");
+            // Repeat reinforcement after orders finish
+            reinforcementPhase();
         }
         else if (command == "win")
         {
@@ -195,4 +215,26 @@ void GameEngine::transition(const std::string &newState)
 std::string GameEngine::getCurrentState() const
 {
     return currentState;
+}
+
+// Returns a shared global Neutral player instance, creates it if it does not exist
+Player* GameEngine::getNeutralPlayer() {
+    if (neutralPlayer == nullptr) {
+        neutralPlayer = new Player("Neutral");
+    }
+    return neutralPlayer;
+}
+
+// Sets/updates the global Neutral player (deletes previous instance if exists)
+void GameEngine::setNeutralPlayer(Player* p) {
+    if (neutralPlayer != nullptr) {
+        delete neutralPlayer;
+    }
+    neutralPlayer = p;
+}
+
+// Register a new player
+void GameEngine::addPlayer(Player* player) {
+    if (player)
+        players.push_back(player);
 }
