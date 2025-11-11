@@ -33,6 +33,8 @@ public:
     void setOwner(Player* owner);                       // Assigns an owner to this territory
     void setContinent(Continent* continent);            // Links this territory to a continent
     void addAdjacent(Territory* territory);             // Adds an adjacent territory (bidirectional link not enforced)
+   
+    bool isAdjacentTo(Territory* other) const;          // Checks whether the current territory is adjacent to another territory
 
     // Stream insertion operator (for printing)
     friend std::ostream& operator<<(std::ostream& out, const Territory& t);
@@ -95,6 +97,8 @@ public:
     // Add methods
     void addContinent(Continent* c);                    // Adds a continent to the map
     void addTerritory(Territory* t);                    // Adds a territory to the map
+
+    Territory* getTerritoryByName(const std::string& name) const;   // Find territory by name (for Bomb, Airlift, Blockade etc.)
 
     // Validates the integrity of the map structure
     // Returns true if:
