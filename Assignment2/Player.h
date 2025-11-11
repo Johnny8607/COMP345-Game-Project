@@ -59,11 +59,17 @@ public:
     int getReinforcementPool() const;
     bool isDoneIssuingOrders() const;
     bool hasConqueredTerritory() const;
+    bool isCeasefireWith(Player* other) const;
+    bool hasAdjacentTerritory(Territory* target) const;
 
     // Setters
     void addToReinforcementPool(int armies);
     void setDoneIssuingOrders(bool done);
     void setConqueredTerritory(bool conquered);
+    
+    void setReinforcementPool(int value); 
+    void addCeasefire(Player* other);
+    void clearCeasefire();
 
     // Stream insertion for help printing Player object; set as friend to access class private members
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
@@ -79,7 +85,8 @@ private:
     int reinforcementPool;                  // Reinforcement pool (army units available for deployment)
     bool DoneIssuingOrders;                 // Flag indicating if player is done issuing orders
     bool ConqueredTerritoryThisTurn;        // Flag indicating if player conquered a territory this turn
-    
+    std::vector<Player*> ceasefirePlayers;  // Used to track players this player is in ceasefire with
+
     // To delete safely all player object members using dynamic memory
     void clearData();
 
