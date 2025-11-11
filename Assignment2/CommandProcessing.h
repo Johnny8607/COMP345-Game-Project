@@ -6,77 +6,64 @@
 #include <iostream>
 #include "Command.h"
 
-// ================================================================
-// CommandProcessor Class
-// ================================================================
-// Responsible for reading, validating, and storing commands either
-// from the console or from a file (via adapter).
-// Handles state transitions according to assignment rules.
-// ================================================================
-
+/*
+ * CommandProcessor
+ *
+ * Reads commands from console, validates them, stores them, and tracks game state.
+ */
 class CommandProcessor {
 public:
-    // ---------- Rule of Three ----------
-    CommandProcessor();                                     // Default constructor
-    CommandProcessor(const CommandProcessor& other);        // Copy constructor
-    CommandProcessor& operator=(const CommandProcessor& other); // Assignment operator
-    virtual ~CommandProcessor();                            // Destructor
+    // Rule of Three
+    CommandProcessor();
+    CommandProcessor(const CommandProcessor& other);
+    CommandProcessor& operator=(const CommandProcessor& other);
+    virtual ~CommandProcessor();
 
-    // ---------- Core Methods ----------
-    virtual void readCommand();                             // Read and process commands (console)
-    void saveCommand(Command* c);                           // Store command object
-    Command* getCommand(size_t index) const;                // Return a copy of stored command
+    // Core Methods
+    virtual void readCommand();              // Read commands from console
+    void saveCommand(Command* c);            // Save command object
+    Command* getCommand(size_t index) const; // Return copy of command at index
 
-    // ---------- Accessors ----------
-    std::string getState() const { return *currentState; }  // Return current state
+    // Accessors
+    std::string getState() const { return *currentState; }
     size_t getCommandCount() const { return commands->size(); }
 
-    // ---------- Operator Overload ----------
+    // Stream insertion
     friend std::ostream& operator<<(std::ostream& out, const CommandProcessor& cp);
 
 protected:
-    // Validates if the given command string is valid for the current game state
-    bool validate(const std::string& command) const;
+    bool validate(const std::string& command) const; // Validate command for current state
 
-    // ---------- Member Variables ----------
-    std::string* currentState;              // Pointer to current game state
-    std::vector<Command*>* commands;        // Pointer to a dynamic list of commands
+    std::string* currentState;          // Current game state
+    std::vector<Command*>* commands;    // List of commands
 };
 
-// ================================================================
-// FileCommandProcessorAdapter Class
-// ================================================================
-// Adapter class to read commands from a file instead of console input.
-// Extends CommandProcessor and overrides reading behavior.
-// ================================================================
-
+/*
+ * FileCommandProcessorAdapter
+ *
+ * Adapter to read commands sequentially from a file.
+ */
 class FileCommandProcessorAdapter : public CommandProcessor {
 public:
-    // ---------- Rule of Three ----------
-    explicit FileCommandProcessorAdapter(const std::string& filename);  // Constructor with filename
-    FileCommandProcessorAdapter(const FileCommandProcessorAdapter& other); // Copy constructor
-    FileCommandProcessorAdapter& operator=(const FileCommandProcessorAdapter& other); // Assignment operator
-    ~FileCommandProcessorAdapter();                                      // Destructor
+    explicit FileCommandProcessorAdapter(const std::string& filename);
+    FileCommandProcessorAdapter(const FileCommandProcessorAdapter& other);
+    FileCommandProcessorAdapter& operator=(const FileCommandProcessorAdapter& other);
+    ~FileCommandProcessorAdapter();
 
-    // ---------- Core Methods ----------
-    void readCommandFromFile();  // Reads next command from file
+    void readCommandFromFile();           // Read next command from file
+    bool hasMoreCommands() const;         // Check if more commands are available
     size_t getFileCommandsCount() const;
 
-    // ---------- Operator Overload ----------
     friend std::ostream& operator<<(std::ostream& out, const FileCommandProcessorAdapter& adapter);
 
 private:
-    // ---------- Member Variables ----------
     std::vector<std::string>* fileCommands;  // Commands loaded from file
-    size_t currentIndex;                     // Tracks the next command to execute
+    size_t currentIndex;                     // Index of next command
 };
 
-// ================================================================
-// Test Driver Function
-// ================================================================
-// Demonstrates the CommandProcessor and FileCommandProcessorAdapter functionality
-// ================================================================
-
+/*
+ * Test driver for Part 1
+ */
 void testCommandProcessor();
 
 #endif // COMMANDPROCESSING_H

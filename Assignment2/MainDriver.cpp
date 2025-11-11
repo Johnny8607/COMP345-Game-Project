@@ -1,4 +1,6 @@
 #include <iostream>
+#include "CommandProcessing.h"
+
 
 void testLoadMaps();
 void testPlayers();
@@ -46,6 +48,11 @@ int main()
     std::cout << "==============================\n"
               << std::endl;
     testGameStates();
+
+std::cout << "Testing Assignment 2 Part 1: Command Processor" << std::endl;
+std::cout << "==============================\n" << std::endl;
+testCommandProcessor();
+pressEnterToContinue();
 
     return 0;
 }

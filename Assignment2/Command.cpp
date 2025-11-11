@@ -4,8 +4,7 @@
 Command::Command(const std::string& command) : command(command), effect("") {}
 
 // Copy constructor
-Command::Command(const Command& other)
-    : command(other.command), effect(other.effect) {}
+Command::Command(const Command& other) : command(other.command), effect(other.effect) {}
 
 // Assignment operator
 Command& Command::operator=(const Command& other) {
@@ -28,7 +27,7 @@ void Command::saveEffect(const std::string& effectStr) {
 std::string Command::getCommand() const { return command; }
 std::string Command::getEffect() const { return effect; }
 
-// Stream insertion operator (print "command -> effect")
+// Stream insertion operator (prints "command -> effect")
 std::ostream& operator<<(std::ostream& out, const Command& cmd) {
     out << cmd.command << " -> " << cmd.effect;
     return out;
