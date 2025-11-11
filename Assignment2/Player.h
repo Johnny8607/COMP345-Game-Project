@@ -32,6 +32,9 @@ public:
     void addOrder(Order* order); // Function to add a new order to player's order list
     OrdersList* getOrders() const; // Pointer to player's orders list
     void playCard(Deck* deck);
+    int getReinforcementPool() const; // Get reinforcement pool value
+    void setReinforcementPool(int value); // Set reinforcement pool value
+    void addReinforcementPool(int value); // Add to reinforcement pool
 
     // Add territory pointer to player's territory list
     void addTerritory(Territory* territory);
@@ -56,6 +59,7 @@ private:
     std::vector<Territory*>* territories;   // Pointer to vector pointers territories of player
     Hand* hand;                             // Player's hand of cards
     OrdersList* orders;                     // Player's orders list
+    int* reinforcementPool;                 // Pointer to reinforcement pool (army units available for deployment)
 
     // To delete safely all player object members using dynamic memory
     void clearData();

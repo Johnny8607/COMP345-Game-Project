@@ -6,11 +6,11 @@
 
 // Constructor using 'new' dynamic memory allocation for name, territories, hand, orders
 Player::Player(const std::string& name)
-    : name(name), territories(new std::vector<Territory*>()), hand(new Hand()), orders(new OrdersList()) {}
+    : name(name), territories(new std::vector<Territory*>()), hand(new Hand()), orders(new OrdersList()), reinforcementPool(new int(0)) {}
 
 // Copy constructor for copying and creating from an existing player
 Player::Player(const Player& other)
-    : name(other.name), territories(nullptr), hand(nullptr), orders(nullptr) {
+    : name(other.name), territories(nullptr), hand(nullptr), orders(nullptr), reinforcementPool(nullptr) {
     copyFrom(other);
 }
 
@@ -45,6 +45,11 @@ void Player::clearData() {
         delete orders; 
         orders = nullptr; 
     }
+
+    if (reinforcementPool) {
+        delete reinforcementPool;
+        reinforcementPool = nullptr;
+    }
 }
 
 // Make new dynamic members copying from another player
@@ -55,6 +60,8 @@ void Player::copyFrom(const Player& other) {
     hand = new Hand(*other.hand);
     // Fresh blank orders list
     orders = new OrdersList();
+    // Copy reinforcement pool
+    reinforcementPool = new int(*other.reinforcementPool);
 }
 
 // Getters definitions
@@ -143,6 +150,21 @@ void Player::issueOrder(const std::string& orderType) {
     if (order) {
         orders->addOrder(order);
     }
+}
+
+// Get reinforcement pool value
+int Player::getReinforcementPool() const {
+    return *reinforcementPool;
+}
+
+// Set reinforcement pool value
+void Player::setReinforcementPool(int value) {
+    *reinforcementPool = value;
+}
+
+// Add to reinforcement pool
+void Player::addReinforcementPool(int value) {
+    *reinforcementPool += value;
 }
 
 // Stream insertion for help printing Player object in specified format

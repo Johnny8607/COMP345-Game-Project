@@ -1,6 +1,8 @@
 #include "GameEngine.h"
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <sstream>
 
 void testGameStates()
 {
@@ -27,7 +29,14 @@ void testGameStates()
         std::cout << "\n"
                   << engine << std::endl;
         std::cout << "Enter command: ";
-        std::cin >> command;
+        
+        // Use getline to handle empty input properly
+        std::getline(std::cin, command);
+        
+        // Skip empty commands
+        if (command.empty()) {
+            continue;
+        }
 
         if (command == "quit")
         {
@@ -49,4 +58,33 @@ void testMainGameLoop()
 {
     GameEngine engine;
     engine.mainGameLoop();
+}
+
+/**
+ * Driver function to test the startup phase
+ * Part 2 Requirement: Demonstrates that startup phase commands are implemented correctly
+ * Supports both console input and file input (via stdin redirection)
+ * 
+ * Usage:
+ *   - Console input: testStartupPhase("") or testStartupPhase()
+ *   - File input: Redirect stdin or call with file commands
+ */
+void testStartupPhase()
+{
+    std::cout << "\n=== TESTING STARTUP PHASE ===" << std::endl;
+    std::cout << "This function demonstrates the startup phase implementation." << std::endl;
+    std::cout << "Commands: loadmap <filename>, validatemap, addplayer <name>, gamestart" << std::endl;
+    std::cout << "For file input, redirect stdin: program < commands.txt" << std::endl;
+    
+    GameEngine engine;
+    
+    // Call startupPhase which implements all the required functionality:
+    // 1) loadmap <filename> - select and load a map
+    // 2) validatemap - validate the map
+    // 3) addplayer <playername> - add 2-6 players
+    // 4) gamestart - distribute territories, randomize order, give 50 armies, draw 2 cards
+    engine.startupPhase();
+    
+    std::cout << "\n=== STARTUP PHASE TEST COMPLETE ===" << std::endl;
+    std::cout << "Final game state: " << engine.getCurrentState() << std::endl;
 }
