@@ -137,25 +137,8 @@ void OrdersList::executeOrders() {
     cout << "All orders executed and cleared.\n";
 }
 
-/**
- * Gets the list of orders.
- */
-const vector<Order*>& OrdersList::getOrders() const {
-    return orders_;
-}
-
 vector<Order*>& OrdersList::getOrders() {
     return orders_;
-}
-
-/**
- * Clears all orders from the list, deleting each one.
- */
-void OrdersList::clear() {
-    for (auto* o : orders_) {
-        delete o;
-    }
-    orders_.clear();
 }
 
 /**

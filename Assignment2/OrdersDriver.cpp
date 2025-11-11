@@ -179,9 +179,3 @@ cout << "\n";
 
     cout << "\n=============== END ===============\n";
 }
-
-
-int main() {
-    testOrderExecution();
-    return 0;
-}

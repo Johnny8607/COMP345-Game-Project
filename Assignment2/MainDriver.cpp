@@ -8,6 +8,7 @@ void testOrderExecution();
 void testCommandProcessor();
 void testStartupPhase();
 void testMainGameLoop();
+void testOrderExecution();
 
 void pressEnterToContinue()
 {
@@ -75,6 +76,12 @@ int main()
     std::cout << "==============================\n"
               << std::endl;
     testMainGameLoop();
+    pressEnterToContinue();
+
+    std::cout << "Testing Assignment 2 Part 4: Order execution" << std::endl;
+    std::cout << "==============================\n"
+              << std::endl;
+    testOrderExecution();
     pressEnterToContinue();
 
     return 0;
