@@ -67,12 +67,18 @@ public:
     void reinforcementPhase();
     void issueOrdersPhase();
     void executeOrdersPhase();
+    static Player* getNeutralPlayer();            // Get (or create) neutral player
+    static void setNeutralPlayer(Player* p);
+    void addPlayer(Player* player);               // Register a new player
     void simulateStartup();
 
 private:
     std::string currentState;
     Map* map;
     Deck* deck;
+    // --- NEW FOR A2 ---
+    static Player* neutralPlayer;        // -- Neutral player pointer
+    // --- END NEW ---
     std::vector<Player*> players;
     /**
      * Transitions the game engine to a new state

@@ -4,7 +4,7 @@ void testLoadMaps();
 void testPlayers();
 void testCards();
 void testGameStates();
-void testOrdersLists();
+void testOrderExecution();
 void testCommandProcessor();
 void testStartupPhase();
 void testMainGameLoop();
@@ -37,10 +37,10 @@ int main()
     testPlayers();
     pressEnterToContinue();
 
-    std::cout << "Testing Part 3: Orders List" << std::endl;
+    std::cout << "Testing Part 4: Orders Execution" << std::endl;
     std::cout << "==============================\n"
               << std::endl;
-    testOrdersLists();
+    testOrderExecution();
     pressEnterToContinue();
 
     std::cout << "Testing Part 4: Cards deck/hand" << std::endl;

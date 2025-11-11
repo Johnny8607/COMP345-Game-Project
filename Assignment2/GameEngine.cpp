@@ -15,6 +15,10 @@
 #include "Orders.h"
 #include "GameEngine.h"
 
+// --- NEW FOR A2 ---
+Player* GameEngine::neutralPlayer = nullptr; // Define static member neutralPlayer
+// --- END ---
+
 /**
  * Default constructor - initializes game engine to "start" state
  */
@@ -773,6 +777,45 @@ bool GameEngine::checkWinCondition() {
     // This is the simplest win condition check
     return players.size() == 1;
 }
+// --- NEW FOR A2 ---
+
+/**
+ * Returns the singleton instance of the Neutral Player.
+ * If it does not exist yet, it is dynamically allocated and created.
+ * 
+ * @return Pointer to the Neutral Player object.
+ */
+Player* GameEngine::getNeutralPlayer() {
+    if (neutralPlayer == nullptr) {
+        neutralPlayer = new Player("Neutral");
+    }
+    return neutralPlayer;
+}
+/**
+ * Replaces the current Neutral Player with a new one.
+ * If a neutral player already exists, it is deleted to prevent memory leaks.
+ * 
+ * @param p Pointer to the new Neutral Player to be assigned.
+ */
+void GameEngine::setNeutralPlayer(Player* p) {
+    if (neutralPlayer != nullptr) {
+        delete neutralPlayer;
+    }
+    neutralPlayer = p;
+}
+
+/**
+ * Registers a new player in the game engine.
+ * The player is added to the internal list only if the pointer is valid.
+ * 
+ * @param player Pointer to the Player object to be added.
+ */
+void GameEngine::addPlayer(Player* player) {
+    if (player)
+        players.push_back(player);
+}
+// --- END ---
+
 
 void GameEngine::simulateStartup()
 {

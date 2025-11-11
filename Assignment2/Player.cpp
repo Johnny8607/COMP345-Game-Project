@@ -96,6 +96,37 @@ OrdersList* Player::getOrders() const {
     return orders;
 }
 
+// --- NEW FOR A2 ---
+// Returns true if this player currently has a ceasefire agreement with `other`.
+bool Player::isCeasefireWith(Player* other) const {
+    for (auto* p : ceasefirePlayers)
+        if (p == other) return true;
+    return false;
+}
+
+// Adds a ceasefire agreement with another player, if not already present.
+// Prevents duplicate entries in the ceasefire list.
+void Player::addCeasefire(Player* other) {
+    if (!isCeasefireWith(other))
+        ceasefirePlayers.push_back(other);
+}
+
+// Clears all active ceasefire agreements.
+void Player::clearCeasefire() {
+    ceasefirePlayers.clear();
+}
+
+// Checks if the target territory is adjacent to any territory owned by this player.
+// Returns true if at least one owned territory is adjacent to the target.
+bool Player::hasAdjacentTerritory(Territory* target) const {
+    for (auto* t : *territories) {
+        if (t->isAdjacentTo(target))
+            return true;
+    }
+    return false;
+}
+// --- END ---
+
 void Player::playCard(Deck *deck) {
     auto& cards = hand->getAllCards();
 
@@ -263,6 +294,14 @@ void Player::setDoneIssuingOrders(bool done) {
  */
 void Player::setConqueredTerritory(bool conquered) {
     ConqueredTerritoryThisTurn = conquered;
+}
+/**
+ * Set the number of armies available in the player's reinforcement pool.
+ * @param value The new number of reinforcement armies for the player
+ *
+*/
+void Player::setReinforcementPool(int value) {
+    reinforcementPool = value;
 }
 
 /**
