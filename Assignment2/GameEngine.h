@@ -2,11 +2,13 @@
 #define GAMEENGINE_H
 
 #include <string>
+#include "Player.h"
 
 class GameEngine
 {
 private:
     std::string currentState;
+    static Player* neutralPlayer;     // Neutral player pointer
 
 public:
     /**
@@ -51,7 +53,9 @@ public:
      */
     std::string getCurrentState() const;
 
-
+    static Player* getNeutralPlayer();             // Get (or create) neutral player
+    static void setNeutralPlayer(Player* p);
+    void addPlayer(Player* player);               // Register a new player
     void mainGameLoop();
     void reinforcementPhase();
     void issueOrdersPhase();
