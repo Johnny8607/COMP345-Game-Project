@@ -6,6 +6,7 @@ void testCards();
 void testGameStates();
 void testOrdersLists();
 void testMainGameLoop();
+void testCommandProcessor();
 
 void pressEnterToContinue() {
     std::cout << "Press Enter to continue...";
@@ -56,6 +57,9 @@ int main()
     std::cout << "==============================\n"
               << std::endl;
     testMainGameLoop();
+    std::cout << "Testing Assignment 2 Part 1: Command Processor" << std::endl;
+    std::cout << "==============================\n" << std::endl;
+    testCommandProcessor();
     pressEnterToContinue();
 
     return 0;
