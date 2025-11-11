@@ -8,6 +8,7 @@ void testOrderExecution();
 void testCommandProcessor();
 void testStartupPhase();
 void testMainGameLoop();
+void testOrdersLists();
 
 void pressEnterToContinue()
 {
