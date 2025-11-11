@@ -2,15 +2,29 @@
 #include "Map.h" // Territory, map
 #include "Hand.h" // Hand, cards
 #include "Orders.h" // Orders, OrdersList
+#include "GameEngine.h"
 #include <algorithm> // Operations, vector
+#include <random>
 
 // Constructor using 'new' dynamic memory allocation for name, territories, hand, orders
 Player::Player(const std::string& name)
-    : name(name), territories(new std::vector<Territory*>()), hand(new Hand()), orders(new OrdersList()) {}
+    : name(name), territories(new std::vector<Territory*>()), hand(new Hand()), orders(new OrdersList()),
+    // --- NEW FOR A2 PART 3 ---
+      reinforcementPool(0),
+      DoneIssuingOrders(false),
+      ConqueredTerritoryThisTurn(false)
+      // --- END NEW ---
+    {}
 
 // Copy constructor for copying and creating from an existing player
 Player::Player(const Player& other)
-    : name(other.name), territories(nullptr), hand(nullptr), orders(nullptr) {
+    : name(other.name), territories(nullptr), hand(nullptr), orders(nullptr),
+    // --- NEW FOR A2 PART 3 ---
+      reinforcementPool(other.reinforcementPool),
+      DoneIssuingOrders(other.DoneIssuingOrders),
+      ConqueredTerritoryThisTurn(other.ConqueredTerritoryThisTurn)
+    // --- END NEW ---
+    {
     copyFrom(other);
 }
 
@@ -21,6 +35,11 @@ Player& Player::operator=(const Player& other) {
         name = other.name;
         copyFrom(other);
     }
+    // --- NEW FOR A2 PART 3 ---
+        reinforcementPool = other.reinforcementPool;
+        DoneIssuingOrders = other.DoneIssuingOrders;
+        ConqueredTerritoryThisTurn = other.ConqueredTerritoryThisTurn;
+    // --- END NEW ---
     return *this;
 }
 
@@ -144,6 +163,97 @@ void Player::issueOrder(const std::string& orderType) {
         orders->addOrder(order);
     }
 }
+
+// --- NEW FOR A2 PART 3 ---
+
+/**
+ * @return The number of armies in the player's reinforcement pool.
+ */
+int Player::getReinforcementPool() const {
+    return reinforcementPool;
+}
+
+/**
+ * @return True if the player is done issuing orders for the turn.
+ */
+bool Player::isDoneIssuingOrders() const {
+    return DoneIssuingOrders;
+}
+
+/**
+ * @return True if the player conquered a territory this turn.
+ */
+bool Player::hasConqueredTerritory() const {
+    return ConqueredTerritoryThisTurn;
+}
+
+/**
+ * Adds armies to the player's reinforcement pool.
+ * @param armies The number of armies to add.
+ */
+void Player::addToReinforcementPool(int armies) {
+    reinforcementPool += armies;
+    std::cout << "Player " << name << " receives " << armies << " reinforcements. (Total: " << reinforcementPool << ")" << std::endl;
+}
+
+/**
+ * Sets the player's "done issuing orders" flag.
+ * @param done The new status.
+ */
+void Player::setDoneIssuingOrders(bool done) {
+    DoneIssuingOrders = done;
+    if(done) {
+        std::cout << "Player " << name << " is done issuing orders." << std::endl;
+    }
+}
+
+/**
+ * Sets the player's "conquered territory" flag.
+ * @param conquered The new status.
+ */
+void Player::setConqueredTerritory(bool conquered) {
+    ConqueredTerritoryThisTurn = conquered;
+}
+
+/**
+ * @brief The main decision-making method for a player.
+ * This implements the logic described in the "Orders Issuing phase".
+ */
+void Player::issueOrder(GameEngine* game) {
+    
+    // "As long as the player has army units in their reinforcement pool...
+    // it will issue a deploy order and no other order."
+    if (reinforcementPool > 0) {
+        // --- PLACEHOLDER ---
+        // A real implementation would use toDefend() to pick a territory.
+        // This stub just deploys 3 armies to the first available territory.
+        
+        int armiesToDeploy = std::min(3, reinforcementPool); // Deploy 3 or all remaining
+        reinforcementPool -= armiesToDeploy;
+        
+        std::cout << "Player " << name << " issuing DEPLOY of " << armiesToDeploy << "(hard coded) armies." << std::endl;
+        issueOrder("deploy"); // Use A1 factory to create a stub "deploy" order
+        return; // One order issued, done for this round-robin tick.
+    }
+
+    // "Once it has deployed all... it can proceed with other kinds of orders." [cite: 128]
+    // --- PLACEHOLDER ---
+    // A real implementation would use toAttack() or playCard().
+    // This stub just issues one "advance" order and then finishes.
+    
+    // Check if we have already issued our one "advance" order
+    if (orders->getOrders().size() == 0 || orders->getOrders().back()->getLabel() == "Deploy") {
+        std::cout << "Player " << name << " issuing ADVANCE (stub)." << std::endl;
+        issueOrder("advance"); // Use A1 factory to create a stub "advance" order
+        return; // One order issued.
+    }
+
+    // If we get here, we have deployed and issued our one advance order.
+    // We signify that we are done for the turn.
+    setDoneIssuingOrders(true);
+}
+
+// --- END NEW ---
 
 // Stream insertion for help printing Player object in specified format
 std::ostream& operator<<(std::ostream& os, const Player& player) {

@@ -113,6 +113,18 @@ public:
     void move(int from, int to);
     void executeOrders();
 
+    /**
+     * @return A const reference to the list of orders.
+     * Allows GameEngine to read the list for execution.
+     */
+    const vector<Order*>& getOrders() const;
+
+    /**
+     * Deletes all orders from the list and from memory.
+     * Called by GameEngine at the end of the execution phase.
+     */
+    void clear();
+
 private:
     vector<Order*> orders_;
     friend ostream& operator<<(ostream&, const OrdersList&);

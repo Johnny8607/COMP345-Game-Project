@@ -2,12 +2,15 @@
 #define GAMEENGINE_H
 
 #include <string>
+#include <vector>
+
+class Map;
+class Player;
+class Deck;
+class MapLoader;
 
 class GameEngine
 {
-private:
-    std::string currentState;
-
 public:
     /**
      * Default constructor - initializes game engine to start state
@@ -51,15 +54,29 @@ public:
      */
     std::string getCurrentState() const;
 
+    // --- NEW: A2 GETTERS ---
+    std::vector<Player*>& getPlayers();
+    Map* getMap();
+    // --- END NEW ---
+
+    // --- NEW FOR A2 ---
+    /**
+     * @brief A placeholder for A2 Part 2.
+     * Manually sets up the game state so the main loop can run.
+     */
+    void startupPhase();
 
     void mainGameLoop();
     void reinforcementPhase();
     void issueOrdersPhase();
     void executeOrdersPhase();
-
-    
+    // --- END NEW ---
 
 private:
+    std::string currentState;
+    Map* map;
+    Deck* deck;
+    std::vector<Player*> players;
     /**
      * Transitions the game engine to a new state
      * @param newState The state to transition to
@@ -71,6 +88,28 @@ private:
      * @return true if valid, false otherwise
      */
     bool isValidTransition(const std::string &command) const;
+    
+    /**
+     * Helper function that distributes territories fairly among players
+     */
+    void distributeTerritories();
+    
+    /**
+     * Helper function to randomly shuffle player order
+     */
+    void shufflePlayerOrder();
+
+    // --- NEW FOR A2 PART 3 (HELPERS) ---
+    /**
+     * @brief Checks if a win condition has been met.
+     */
+    bool checkWinCondition();
+
+    /**
+     * @brief Removes players with no territories from the game.
+     */
+    void removeEliminatedPlayers();
+    // --- END NEW ---
 };
 
 #endif
