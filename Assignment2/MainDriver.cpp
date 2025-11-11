@@ -4,7 +4,7 @@ void testLoadMaps();
 void testPlayers();
 void testCards();
 void testGameStates();
-void testOrdersLists();
+void testOrderExecution();
 void testCommandProcessor();
 
 void pressEnterToContinue() {
@@ -16,7 +16,7 @@ void pressEnterToContinue() {
 int main()
 {     
     std::cout << "\n******************************\n" << std::endl;
-    std::cout << "=== COMP 345 Assignment 1 ===" << std::endl;
+    std::cout << "=== COMP 345 Assignment 2 ===" << std::endl;
     std::cout << "\n******************************\n" << std::endl;
 
     std::cout << "Testing Part 1: Map" << std::endl;
@@ -31,10 +31,10 @@ int main()
     testPlayers();
     pressEnterToContinue();
 
-    std::cout << "Testing Part 3: Orders List" << std::endl;
+    std::cout << "Testing Part 4: Orders Execution" << std::endl;
     std::cout << "==============================\n"
               << std::endl;
-    testOrdersLists();
+    testOrderExecution();
     pressEnterToContinue();
 
     std::cout << "Testing Part 4: Cards deck/hand" << std::endl;
