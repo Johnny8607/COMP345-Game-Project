@@ -112,6 +112,10 @@ const vector<Order*>& OrdersList::getOrders() const {
     return orders_;
 }
 
+vector<Order*>& OrdersList::getOrders() {
+    return orders_;
+}
+
 /**
  * Clears all orders from the list, deleting each one.
  */

@@ -119,6 +119,8 @@ public:
      */
     const vector<Order*>& getOrders() const;
 
+    vector<Order*>& getOrders();  //nonconst getter
+
     /**
      * Deletes all orders from the list and from memory.
      * Called by GameEngine at the end of the execution phase.

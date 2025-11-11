@@ -3,27 +3,24 @@
 #include "Hand.h" // Hand, cards
 #include "Orders.h" // Orders, OrdersList
 #include "GameEngine.h"
+#include "Cards.h"
 #include <algorithm> // Operations, vector
 #include <random>
 
 // Constructor using 'new' dynamic memory allocation for name, territories, hand, orders
 Player::Player(const std::string& name)
     : name(name), territories(new std::vector<Territory*>()), hand(new Hand()), orders(new OrdersList()),
-    // --- NEW FOR A2 PART 3 ---
       reinforcementPool(0),
       DoneIssuingOrders(false),
       ConqueredTerritoryThisTurn(false)
-      // --- END NEW ---
     {}
 
 // Copy constructor for copying and creating from an existing player
 Player::Player(const Player& other)
     : name(other.name), territories(nullptr), hand(nullptr), orders(nullptr),
-    // --- NEW FOR A2 PART 3 ---
       reinforcementPool(other.reinforcementPool),
       DoneIssuingOrders(other.DoneIssuingOrders),
       ConqueredTerritoryThisTurn(other.ConqueredTerritoryThisTurn)
-    // --- END NEW ---
     {
     copyFrom(other);
 }
@@ -35,11 +32,9 @@ Player& Player::operator=(const Player& other) {
         name = other.name;
         copyFrom(other);
     }
-    // --- NEW FOR A2 PART 3 ---
         reinforcementPool = other.reinforcementPool;
         DoneIssuingOrders = other.DoneIssuingOrders;
         ConqueredTerritoryThisTurn = other.ConqueredTerritoryThisTurn;
-    // --- END NEW ---
     return *this;
 }
 
@@ -157,14 +152,69 @@ std::vector<Territory*> Player::toAttack() const {
 
 // Create and add order to list if possible
 void Player::issueOrder(const std::string& orderType) {
-    OrderFactory factory;
-    Order* order = factory.createOrder(orderType);
-    if (order) {
-        orders->addOrder(order);
+    // 0. If done already, exit
+    if (DoneIssuingOrders) {
+        return;
     }
-}
 
-// --- NEW FOR A2 PART 3 ---
+    // 1. DEPLOY only while reinforcementPool > 0
+    if (reinforcementPool > 0) {
+
+        // choose a territory to defend
+        std::vector<Territory*> defendList = toDefend();
+        Territory* target = nullptr;
+
+        if (!defendList.empty()) {
+            target = defendList.front();
+        }
+        else if (territories && !territories->empty()) {
+            target = territories->at(0);
+        }
+
+        if (target) {
+            int amount = std::min(3, reinforcementPool);
+            reinforcementPool -= amount;
+
+            std::cout << name << " issues DEPLOY on " 
+                      << target->getName() << " (" << amount << " armies)\n";
+
+            OrderFactory factory;
+            orders->addOrder(factory.createOrder("deploy"));
+        }
+
+        return;
+    }
+
+    // 2. ADVANCE (defend or attack)
+    // Try defending first
+    auto defendList = toDefend();
+    if (defendList.size() >= 2) {
+        std::cout << name << " issues ADVANCE (defend)\n";
+        OrderFactory factory;
+        orders->addOrder(factory.createOrder("advance"));
+        return;
+    }
+
+    // Try attacking
+    auto attackList = toAttack();
+    if (!attackList.empty()) {
+        std::cout << name << " issues ADVANCE (attack)\n";
+        OrderFactory factory;
+        orders->addOrder(factory.createOrder("advance"));
+        return;
+    }
+
+    // 3. Play a card if available
+    if (!hand->getAllCards().empty()) {
+        std::cout << name << " plays a card\n";
+        playCard(nullptr);
+        return;
+    }
+
+    // 4. Nothing left => DONE
+    DoneIssuingOrders = true;
+    std::cout << name << " is DONE issuing orders.\n";
+}
 
 /**
  * @return The number of armies in the player's reinforcement pool.
@@ -236,7 +286,7 @@ void Player::issueOrder(GameEngine* game) {
         return; // One order issued, done for this round-robin tick.
     }
 
-    // "Once it has deployed all... it can proceed with other kinds of orders." [cite: 128]
+    // "Once it has deployed all... it can proceed with other kinds of orders."
     // --- PLACEHOLDER ---
     // A real implementation would use toAttack() or playCard().
     // This stub just issues one "advance" order and then finishes.
@@ -252,8 +302,6 @@ void Player::issueOrder(GameEngine* game) {
     // We signify that we are done for the turn.
     setDoneIssuingOrders(true);
 }
-
-// --- END NEW ---
 
 // Stream insertion for help printing Player object in specified format
 std::ostream& operator<<(std::ostream& os, const Player& player) {

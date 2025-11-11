@@ -567,10 +567,8 @@ void GameEngine::startupPhase()
     }
 }
 
-// --- NEW A2 GETTERS ---
 std::vector<Player*>& GameEngine::getPlayers() { return players; }
 Map* GameEngine::getMap() { return map; }
-// --- END NEW ---
 
 /**
  * Runs the main game loop
@@ -618,19 +616,45 @@ void GameEngine::mainGameLoop()
 void GameEngine::reinforcementPhase() {
     std::cout << "--- Reinforcement Phase ---" << std::endl;
     for (Player* p : players) {
-        // 1. Armies for territories (num territories / 3)
-        int terrBonus = std::floor(p->getTerritories()->size() / 3);
+        // 1. Armies for territories
+        int terrBonus = static_cast<int>(std::floor(p->getTerritories()->size() / 3.0));
         
         // 2. Armies for continents
         int contBonus = 0;
-        // --- PLACEHOLDER ---
-        // A real implementation would check if the player
-        // owns all territories in each continent and add the bonus value.
-        // for (Continent* c : *map->getContinents()) { ... }
+        if (map && map->getContinents()) {
+            for (Continent* c : *map->getContinents()) {
+                if (!c) {
+                    continue;
+                }
+
+                auto* territories = c->getTerritories();
+                if (!territories || territories->empty()) {
+                    continue;
+                }
+
+                bool ownsAll = true;
+
+                for (Territory* t : *territories) {
+                    if (!t || t->getOwner() != p) {
+                        ownsAll = false;
+                        break;
+                    }
+                }
+
+                if (ownsAll) {
+                    contBonus += c->getControlValue();
+                }
+            }
+        }
         
         // 3. Total (min 3) 
         int total = std::max(3, terrBonus + contBonus);
         p->addToReinforcementPool(total); // "placed in the player's reinforcement pool" 
+
+        std::cout << "Reinforcement -> " << p->getName()
+            << " : terr=" << terrBonus
+            << " cont=" << contBonus
+            << " total=" << total << "\n";
     }
 }
 
@@ -674,40 +698,55 @@ void GameEngine::issueOrdersPhase() {
 void GameEngine::executeOrdersPhase() {
     std::cout << "--- Executing Orders Phase ---" << std::endl;
 
-    // "The game engine should execute all the deploy orders before..." 
-    std::cout << "--- Executing DEPLOYS (Placeholders) ---" << std::endl;
-    for (Player* p : players) {
-        OrdersList* list = p->getOrders();
-        for (Order* o : list->getOrders()) {
-            if (o->getLabel() == "Deploy") { // Check order type
-                o->execute(); // Calls A1 stub
+    // Helper lambdas: pull one order matching a predicate; otherwise nullptr
+    auto popNextMatching = [](OrdersList* orderList, auto pred) -> Order* {
+        if (!orderList) return nullptr;
+        auto& vector = orderList->getOrders();
+        for (size_t i = 0; i < vector.size(); ++i) {
+            if (pred(vector[i])) {
+                Order* o = vector[i];
+                vector.erase(vector.begin() + i);
+                return o;
             }
         }
-    }
-    
-    // "...it executes any other kind of order." 
-    std::cout << "--- Executing OTHER ORDERS (Placeholders) ---" << std::endl;
-    for (Player* p : players) {
-        for (Order* o : p->getOrders()->getOrders()) {
-            if (o->getLabel() != "Deploy") { // Check order type
-                o->execute(); // Calls A1 stub
+        return nullptr;
+    };
+
+    // Stage 1: execute DEPLOY orders round-robin until none remain anywhere
+    bool anyExecuted = true;
+    while (anyExecuted) {
+        anyExecuted = false;
+        for (Player* p : players) {
+            if (!p) continue;
+            Order* nextOrder = popNextMatching(p->getOrders(), [](Order* o){ return o && o->getLabel() == "Deploy"; });
+            if (nextOrder) {
+                nextOrder->execute();
+                delete nextOrder;
+                anyExecuted = true;
             }
         }
     }
 
-    // 3. Award cards (stub)
-    // "A player receives a card... if they successfully conquered..." 
-    for (Player* p : players) {
-        // --- PLACEHOLDER ---
-        // A real Part 4 implementation would set this flag
-        // if (p->hasConqueredTerritory()) {
-        //    std::cout << p->getName() << " gets a card (stub)." << std::endl;
-        //    p->getHand()->addCard(deck->draw());
-        //    p->setConqueredTerritory(false); // Reset flag
-        // }
+    // Stage 2: execute ALL OTHER orders round-robin
+    anyExecuted = true;
+    while (anyExecuted) {
+        anyExecuted = false;
+        for (Player* p : players) {
+            if (!p) continue;
+            Order* nonDep = popNextMatching(p->getOrders(), [](Order* o){ return o && o->getLabel() != "Deploy"; });
+            if (nonDep) {
+                nonDep->execute();
+                delete nonDep;
+                anyExecuted = true;
+            }
+        }
+    }
 
-        // Clear all orders from this turn
-        p->getOrders()->clear(); // Uses new method from Step 2
+    // Award cards if conquered
+    for (Player* p : players) {
+        if (p->hasConqueredTerritory()) { p->getHand()->addCard(deck->draw()); p->setConqueredTerritory(false); }
+        // Clear any leftover
+        p->getOrders()->clear();
     }
 }
 
@@ -733,4 +772,69 @@ bool GameEngine::checkWinCondition() {
     // "loop shall continue until only one of the players"
     // This is the simplest win condition check
     return players.size() == 1;
+}
+
+void GameEngine::simulateStartup()
+{
+    std::cout << "\n=== SIMULATED STARTUP PHASE ===" << std::endl;
+
+    // 1. Load a default small map
+    MapLoader loader("good_map.txt");
+    map = loader.load();
+
+    if (!map) {
+        std::cout << "ERROR: simulateStartup() could not load good_map.map" << std::endl;
+        return;
+    }
+
+    transition("map loaded");
+
+    // 2. Validate map
+    if (!map->validate()) {
+        std::cout << "ERROR: simulateStartup() map validation failed" << std::endl;
+        return;
+    }
+
+    transition("map validated");
+
+    // 3. Create 2 players
+    players.push_back(new Player("PlayerA"));
+    players.push_back(new Player("PlayerB"));
+
+    transition("players added");
+
+    // 4. Create deck
+    deck = new Deck();
+    CardType types[] = {
+        CardType::Bomb, CardType::Reinforcement,
+        CardType::Blockade, CardType::Airlift,
+        CardType::Diplomacy
+    };
+    for (int i = 0; i < 20; i++) {
+        deck->addCard(new Card(types[i % 5]));
+    }
+
+    // 5. Distribute territories
+    distributeTerritories();
+
+    // 6. Randomize turn order
+    shufflePlayerOrder();
+
+    // 7. Give each player 50 starting armies
+    for (Player* p : players) {
+        p->addToReinforcementPool(50);
+    }
+
+    // 8. Each player draws 2 cards
+    for (Player* p : players) {
+        for (int i = 0; i < 2; i++) {
+            Card* c = deck->draw();
+            if (c) p->getHand()->addCard(c);
+        }
+    }
+
+    // 9. Move to first in-game phase
+    transition("assign reinforcement");
+
+    std::cout << "=== Simulated Startup Complete ===" << std::endl;
 }
