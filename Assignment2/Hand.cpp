@@ -55,7 +55,21 @@ void Hand::removeCard(Card * card) {
     }
 }
 
-std::vector<Card*>& Hand::getAllCards() const {
+void Hand::removeLastCard() {
+    if (cards->empty()) {
+        return;
+    }
+
+    Card* lastCard = cards->back();
+    delete lastCard;
+    cards->pop_back();
+}
+
+std::vector<Card*>& Hand::getAllCards() {
+    return *cards;
+}
+
+const std::vector<Card*>& Hand::getAllCards() const {
     return *cards;
 }
 

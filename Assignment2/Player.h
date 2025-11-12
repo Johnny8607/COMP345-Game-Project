@@ -25,6 +25,7 @@ class GameEngine;
 class Player { 
 
 public:
+    bool hasPlayedCardThisRound = false;
 
     // Constructors
     Player(const std::string& name); // Set player name

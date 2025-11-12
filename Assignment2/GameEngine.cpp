@@ -668,6 +668,7 @@ void GameEngine::issueOrdersPhase() {
     
     // 1. Reset all player "done" flags to false
     for (Player* p : players) {
+        p->hasPlayedCardThisRound = false;
         p->setDoneIssuingOrders(false);
     }
 

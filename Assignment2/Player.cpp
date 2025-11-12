@@ -254,69 +254,93 @@ void Player::setReinforcementPool(int value) {
  * @brief The main decision-making method for a player.
  * This implements the logic described in the "Orders Issuing phase".
  */
-void Player::issueOrder(GameEngine* game)
+void Player::issueOrder(GameEngine* engine)
 {
-    // 1. If done already → stop
-    if (DoneIssuingOrders)
-        return;
+    cout << "Player " << name << " issuing an order..." << endl;
 
-    // 2. While reinforcementPool > 0: issue DEPLOY
+    if (reinforcementPool <= 0 && (territories->empty() || (toDefend().empty() && toAttack().empty())) 
+        && hand->getAllCards().empty())
+    {
+        cout << "Player " << name << " has no more actions to issue." << endl;
+        DoneIssuingOrders = true;
+        return;
+    }
+
+    // 1. Deploy orders while reinforcements remain
     if (reinforcementPool > 0)
     {
+        int deployAmount = std::min(3, reinforcementPool);
+
+        Territory* target = nullptr;
         auto defendList = toDefend();
-        Territory* target = defendList.empty() ? nullptr : defendList[0];
-        if (!target && !territories->empty())
+        if (!defendList.empty())
+            target = defendList.front();
+        else if (!territories->empty())
             target = territories->at(0);
 
-        int amount = std::min(3, reinforcementPool);
-        reinforcementPool -= amount;
-
-        cout << "Player " << name << " issuing DEPLOY of " << amount << " armies." << endl;
-
-        orders->addOrder(new Deploy(this, target, amount));
-        return;   // only issue ONE per round-robin cycle
-    }
-
-    // 3. Issue ADVANCE if possible
-    auto defendList = toDefend();
-    if (defendList.size() >= 2)
-    {
-        Territory* from = defendList[0];
-        Territory* to = defendList[1];
-
-        cout << "Player " << name << " issues ADVANCE (defend)" << endl;
-        orders->addOrder(new Advance(this, from, to, 2));
-        return;
-    }
-
-    auto attackList = toAttack();
-    if (!attackList.empty())
-    {
-        // Pick first adjacent owned territory as source
-        Territory* target = attackList[0];
-        Territory* source = nullptr;
-        for (auto* t : *territories)
-            if (t->isAdjacentTo(target)) { source = t; break; }
-
-        if (source)
+        if (target)
         {
-            cout << "Player " << name << " issues ADVANCE (attack)" << endl;
-            orders->addOrder(new Advance(this, source, target, 2));
+            cout << name << " => DEPLOY on " << target->getName()
+                 << " (" << deployAmount << " armies)" << endl;
+            orders->addOrder(new Deploy(this, target, deployAmount));
+        }
+
+        reinforcementPool -= deployAmount;
+        if (reinforcementPool > 0) {
+            // still have more to deploy later
+            return; 
+        }
+    }
+
+    // 2. Advance once per round
+    {
+        auto defendList = toDefend();
+        auto attackList = toAttack();
+
+        if (!defendList.empty() && !attackList.empty())
+        {
+            Territory* src = defendList.front();
+            Territory* tgt = attackList.front();
+
+            cout << name << " => ADVANCE (attack)" << endl;
+            orders->addOrder(new Advance(this, src, tgt, 1));
+            DoneIssuingOrders = true; // after one advance, stop for this round
+            return;
+        }
+
+        if (defendList.size() >= 2)
+        {
+            Territory* src = defendList[0];
+            Territory* tgt = defendList[1];
+
+            cout << name << " => ADVANCE (defend)" << endl;
+            orders->addOrder(new Advance(this, src, tgt, 1));
+            DoneIssuingOrders = true;
             return;
         }
     }
 
-    // 4. Play a card
-    if (!hand->getAllCards().empty())
+    // 3. Play one card if available
+    if (!hand->getAllCards().empty() && !hasPlayedCardThisRound)
     {
-        cout << "Player " << name << " plays a card" << endl;
-        playCard(game->getDeck());  
+        Card* card = hand->getAllCards().back();
+        cout << name << " => plays a card" << endl;
+
+        Order* cardOrder = card->play(this);
+        if (cardOrder)
+            orders->addOrder(cardOrder);
+
+        hand->removeLastCard();
+        hasPlayedCardThisRound = true;
+
+        // after playing one card, done for now
+        DoneIssuingOrders = true;
         return;
     }
 
-    // 5. Nothing else DONE
+    // 4. nothign left => DONE
+    cout << "Player " << name << " => done issuing orders." << endl;
     DoneIssuingOrders = true;
-    cout << "Player " << name << " is done issuing orders." << endl;
 }
 
 
