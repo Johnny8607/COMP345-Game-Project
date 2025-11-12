@@ -601,7 +601,7 @@ void GameEngine::mainGameLoop()
         // 4. Check for eliminated players
         removeEliminatedPlayers();
         
-        // 5. Check for win condition [cite: 120]
+        // 5. Check for win condition
         if (checkWinCondition()) {
             transition("win");
             std::cout << "!!! GAME OVER: " << players[0]->getName() << " wins! !!!" << std::endl;
@@ -678,7 +678,7 @@ void GameEngine::issueOrdersPhase() {
     {
         playersDone = 0; // Reset count each full round
         
-        // "called in round-robin fashion across all players" [cite: 114]
+        // "called in round-robin fashion across all players"
         for (Player* p : players) {
             if (!p->isDoneIssuingOrders()) {
                 p->issueOrder(this); // Player issues one order OR sets flag
