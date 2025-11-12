@@ -691,65 +691,70 @@ void GameEngine::issueOrdersPhase() {
     std::cout << "All players have issued orders." << std::endl;
 }
 
-/**
- * == A2 PART 3: HELPER IMPLEMENTATION ==
- * Implements the order *execution loop* logic
- * This calls the STUB orders (Part 4 placeholder).
- * 
- * Will be replaced with actual implementation in A2 Part 4.
- */
 void GameEngine::executeOrdersPhase() {
     std::cout << "--- Executing Orders Phase ---" << std::endl;
 
-    // Helper lambdas: pull one order matching a predicate; otherwise nullptr
-    auto popNextMatching = [](OrdersList* orderList, auto pred) -> Order* {
-        if (!orderList) return nullptr;
-        auto& vector = orderList->getOrders();
-        for (size_t i = 0; i < vector.size(); ++i) {
-            if (pred(vector[i])) {
-                Order* o = vector[i];
-                vector.erase(vector.begin() + i);
-                return o;
-            }
-        }
-        return nullptr;
-    };
-
-    // Stage 1: execute DEPLOY orders round-robin until none remain anywhere
+    // 1. Execute all DEPLOY orders first (round-robin)
     bool anyExecuted = true;
     while (anyExecuted) {
         anyExecuted = false;
         for (Player* p : players) {
-            if (!p) continue;
-            Order* nextOrder = popNextMatching(p->getOrders(), [](Order* o){ return o && o->getLabel() == "Deploy"; });
-            if (nextOrder) {
-                nextOrder->execute();
-                delete nextOrder;
-                anyExecuted = true;
+            if (!p || !p->getOrders()) continue;
+
+            auto& vector = p->getOrders()->getOrders();
+            for (size_t i = 0; i < vector.size(); ++i) {
+                Order* order = vector[i];
+                if (order && order->getLabel() == "Deploy") {
+                    // executes + validates internally
+                    order->execute();
+                    delete order;
+                    vector.erase(vector.begin() + i);
+                    anyExecuted = true;
+                    // move to next player
+                    break;
+                }
             }
         }
     }
 
-    // Stage 2: execute ALL OTHER orders round-robin
+    // 2. Execute all remaining orders
     anyExecuted = true;
     while (anyExecuted) {
         anyExecuted = false;
         for (Player* p : players) {
-            if (!p) continue;
-            Order* nonDep = popNextMatching(p->getOrders(), [](Order* o){ return o && o->getLabel() != "Deploy"; });
-            if (nonDep) {
-                nonDep->execute();
-                delete nonDep;
-                anyExecuted = true;
+            if (!p || !p->getOrders()) continue;
+
+            auto& vec = p->getOrders()->getOrders();
+            for (size_t i = 0; i < vec.size(); ++i) {
+                Order* o = vec[i];
+                if (o && o->getLabel() != "Deploy") {
+                    o->execute();
+                    delete o;
+                    vec.erase(vec.begin() + i);
+                    anyExecuted = true;
+                    break;
+                }
             }
         }
     }
 
-    // Award cards if conquered
+    // 3. Award cards for successful conquests
     for (Player* p : players) {
-        if (p->hasConqueredTerritory()) { p->getHand()->addCard(deck->draw()); p->setConqueredTerritory(false); }
-        // Clear any leftover
-        p->getOrders()->clear();
+        if (p->hasConqueredTerritory()) {
+            if (deck) {
+                Card* reward = deck->draw();
+                if (reward && p->getHand()) {
+                    p->getHand()->addCard(reward);
+                    std::cout << p->getName() << " received a card for conquering this turn.\n";
+                }
+            }
+            p->setConqueredTerritory(false);
+        }
+
+        // Clean up leftover orders
+        if (p->getOrders()) {
+            p->getOrders()->clear();
+        }
     }
 }
 
