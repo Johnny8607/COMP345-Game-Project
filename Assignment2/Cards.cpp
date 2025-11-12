@@ -42,17 +42,14 @@ std::string Card::toString() {
     }
 }
 
-void Card::play(Player* player) {
-    std::cout << "playing card => " << getType() << std::endl;
-    
+Order* Card::play(Player* player) {
+    std::cout << "playing card => " << toString() << std::endl;
+
     OrderFactory factory;
     Order* order = factory.createOrder(this->toString());
 
-    if (order) {
-        player->addOrder(order);
-    }
+    return order;
 }
-
 // stream insertion operator for CardType
 std::ostream &operator<<(std::ostream &os, const CardType type)
 {

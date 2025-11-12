@@ -3,12 +3,15 @@
 
 #include <string>
 #include "LoggingObserver.h"
+#include <vector>
+
+class Map;
+class Player;
+class Deck;
+class MapLoader;
 
 class GameEngine : ILoggable , Subject
 {
-private:
-    std::string currentState;
-
 public:
     /**
      * Default constructor - initializes game engine to start state
@@ -52,11 +55,24 @@ public:
      */
     std::string getCurrentState() const;
 
+    std::vector<Player*>& getPlayers();
+    Map* getMap();
+    Deck * getDeck() { return deck; }
+
+    /**
+     * @brief A placeholder for A2 Part 2.
+     * Manually sets up the game state so the main loop can run.
+     */
+    void startupPhase();
 
     void mainGameLoop();
     void reinforcementPhase();
     void issueOrdersPhase();
     void executeOrdersPhase();
+    static Player* getNeutralPlayer();            // Get (or create) neutral player
+    static void setNeutralPlayer(Player* p);
+    void addPlayer(Player* player);               // Register a new player
+    void simulateStartup();
 
     
     
@@ -65,6 +81,11 @@ public:
     }
 
 private:
+    std::string currentState;
+    Map* map;
+    Deck* deck;
+    static Player* neutralPlayer;        // -- Neutral player pointer
+    std::vector<Player*> players;
     /**
      * Transitions the game engine to a new state
      * @param newState The state to transition to
@@ -76,6 +97,26 @@ private:
      * @return true if valid, false otherwise
      */
     bool isValidTransition(const std::string &command) const;
+    
+    /**
+     * Helper function that distributes territories fairly among players
+     */
+    void distributeTerritories();
+    
+    /**
+     * Helper function to randomly shuffle player order
+     */
+    void shufflePlayerOrder();
+
+    /**
+     * @brief Checks if a win condition has been met.
+     */
+    bool checkWinCondition();
+
+    /**
+     * @brief Removes players with no territories from the game.
+     */
+    void removeEliminatedPlayers();
 };
 
 #endif

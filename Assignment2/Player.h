@@ -14,10 +14,18 @@
 #include "Hand.h"
 #include "Deck.h"
 
+// Forward declarations
+class Territory;
+class Hand;
+class OrdersList;
+class Deck;
+class GameEngine;
+
 // Player class following the Rule of Three for careful memory management
 class Player { 
 
 public:
+    bool hasPlayedCardThisRound = false;
 
     // Constructors
     Player(const std::string& name); // Set player name
@@ -45,6 +53,25 @@ public:
     // Order creation and add to OrdersList
     void issueOrder(const std::string& orderType);
 
+    // The main decision-making method for a player (overloaded version)
+    void issueOrder(GameEngine *game);
+
+    // Getters
+    int getReinforcementPool() const;
+    bool isDoneIssuingOrders() const;
+    bool hasConqueredTerritory() const;
+    bool isCeasefireWith(Player* other) const;
+    bool hasAdjacentTerritory(Territory* target) const;
+
+    // Setters
+    void addToReinforcementPool(int armies);
+    void setDoneIssuingOrders(bool done);
+    void setConqueredTerritory(bool conquered);
+    
+    void setReinforcementPool(int value); 
+    void addCeasefire(Player* other);
+    void clearCeasefire();
+
     // Stream insertion for help printing Player object; set as friend to access class private members
     friend std::ostream& operator<<(std::ostream& os, const Player& player);
 
@@ -56,6 +83,10 @@ private:
     std::vector<Territory*>* territories;   // Pointer to vector pointers territories of player
     Hand* hand;                             // Player's hand of cards
     OrdersList* orders;                     // Player's orders list
+    int reinforcementPool;                  // Reinforcement pool (army units available for deployment)
+    bool DoneIssuingOrders;                 // Flag indicating if player is done issuing orders
+    bool ConqueredTerritoryThisTurn;        // Flag indicating if player conquered a territory this turn
+    std::vector<Player*> ceasefirePlayers;  // Used to track players this player is in ceasefire with
 
     // To delete safely all player object members using dynamic memory
     void clearData();
