@@ -304,7 +304,7 @@ bool Negotiate::validate()const {
  * - Executes Deploy order.
  * - Deducts armies from reinforcement pool and adds them to the target territory.
  */
-void Deploy::execute()   const { 
+void Deploy::execute()    { 
     if (!validate()) return;
     player->setReinforcementPool(player->getReinforcementPool() - armies);
     target->setArmies(target->getArmies() + armies);
@@ -315,7 +315,7 @@ void Deploy::execute()   const {
  * - Moves armies or attacks enemy territory with dice-based casualty simulation.
  * - Conquers territory if defender loses all armies.
  */
-void Advance::execute()  const {  
+void Advance::execute()   {  
     if (!validate()) return;
     cout << "Executing Advance from " << source->getName() << " ->" << target->getName() << " (Army number: " << armies << ")\n";
     source->setArmies(source->getArmies() - armies);
@@ -353,7 +353,7 @@ void Advance::execute()  const {
  * - Executes Bomb order.
  * - Halves the number of armies on the target enemy territory.
  */
-void Bomb::execute() const { 
+void Bomb::execute()  { 
     if (!validate()) return;
     int old = target->getArmies();
     target->setArmies(old / 2);
@@ -363,7 +363,7 @@ void Bomb::execute() const {
  * - Executes Blockade order.
  * - Doubles armies on the territory and transfers ownership to Neutral player.
  */
-void Blockade::execute() const { 
+void Blockade::execute()  { 
      if (!validate()) return;
 
     target->setArmies(target->getArmies() * 2);
@@ -377,7 +377,7 @@ void Blockade::execute() const {
  * - Executes Airlift order.
  * - Transfers armies between two territories owned by the same player.
  */
-void Airlift::execute() const {  
+void Airlift::execute()  {  
     if (!validate()) return;
     source->setArmies(source->getArmies() - armies);
     target->setArmies(target->getArmies() + armies);
@@ -386,7 +386,7 @@ void Airlift::execute() const {
  * - Executes Negotiate order.
  * - Establishes ceasefire (no attacks) between two players this turn.
  */
-void Negotiate::execute()const {   if (!validate()) return;
+void Negotiate::execute()  {   if (!validate()) return;
     player->addCeasefire(targetPlayer);
     targetPlayer->addCeasefire(player);
     cout << "Ceasefire established between " << player->getName() << " and " << targetPlayer->getName() << ".\n"; }
