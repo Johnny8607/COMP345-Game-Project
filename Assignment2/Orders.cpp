@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Map.h"
 #include "GameEngine.h"
+#include "LoggingObserver.h"
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -166,9 +167,9 @@ ostream& operator<<(ostream& out, const OrdersList& ol) {
 }
 
 // Observer Pattern Implementation orderlist
-// std::string OrdersList::stringToLog() const{
-//     return "Order Issued: " + orders_->back()->getLabel();
-// }
+std::string OrdersList::stringToLog() const{
+    return "Order Issued: " + orders_.back()->getLabel();
+}
 
 // Observer Pattern Implementation order execute
 std::string Order::stringToLog() const{
@@ -317,12 +318,12 @@ bool Negotiate::validate()const {
  * - Executes Deploy order.
  * - Deducts armies from reinforcement pool and adds them to the target territory.
  */
-void Deploy::execute()   const { 
+void Deploy::execute() const { 
     if (!validate()) return;
     player->setReinforcementPool(player->getReinforcementPool() - armies);
     target->setArmies(target->getArmies() + armies);
     cout << armies << " armies deployed to " << target->getName() << ". Total: " << target->getArmies() << "\n"; 
-    // Notify(this);
+    Notify(this);
 }
 
 /**
@@ -406,11 +407,12 @@ void Airlift::execute() const {
  * - Executes Negotiate order.
  * - Establishes ceasefire (no attacks) between two players this turn.
  */
-void Negotiate::execute()const {   if (!validate()) return;
+void Negotiate::execute()const {   
+    if (!validate()) return;
     player->addCeasefire(targetPlayer);
     targetPlayer->addCeasefire(player);
     cout << "Ceasefire established between " << player->getName() << " and " << targetPlayer->getName() << ".\n"; 
-    // Notify(this);
+    //notify(this);
     }
 
 

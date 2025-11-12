@@ -27,20 +27,15 @@ public:
     virtual bool validate() const = 0;        // Check if order is legal
     virtual void execute() const = 0;         // Apply order effect
     virtual Order* clone() const = 0;         // Deep copy (polymorphic)
-
+  // Observer pattern implementation
+    std::string stringToLog() const override {
+    }
 protected:
     Player* player = nullptr;                 // Player issuing the order
     Territory* source = nullptr;              // Optional for movement
     Territory* target = nullptr;              // Target territory 
     int armies = 0;                           // Number of armies involved
     GameEngine* engine = nullptr;             // Allow Order to access GameEngine (for Neutral Player)
-
-
-
- private:
-    // Observer pattern implementation
-    std::string stringToLog() const override {
-    }
 
 private:
     virtual ostream& print(ostream&) const = 0;
