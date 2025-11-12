@@ -39,7 +39,7 @@ void OrdersList::addOrder(Order* order) {
         return;
     }
     orders_.push_back(order);
-     cout << "\n=========== ADDING ORDERS ===========\n";
+    cout << "\n=========== ADDING ORDERS ===========\n";
     cout << "No.  | Order\n";
     cout << "----------------\n";
 
@@ -49,6 +49,7 @@ void OrdersList::addOrder(Order* order) {
     }
 
     cout << "----------------\n";
+    Notify(this);
 }
 
 /**
@@ -125,6 +126,15 @@ ostream& operator<<(ostream& out, const OrdersList& ol) {
     return out;
 }
 
+// Observer Pattern Implementation orderlist
+std::string OrdersList::stringToLog() const{
+    return "Order Issued: " + orders_->back()->getLabel();
+}
+
+// Observer Pattern Implementation order execute
+std::string OrdersList::stringToLog() const{
+    return "Order Executed: " + this.Label();
+}
 
 // =====================  ORDER SUBCLASSES  =====================
 

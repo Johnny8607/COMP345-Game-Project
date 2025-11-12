@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "LoggingObserver.h"
 
 using std::cout;
 using std::endl;
@@ -11,12 +12,16 @@ using std::ostream;
 using std::string;
 
 //Abstract base class for all order types
-class Order {
+class Order : ILoggable , Subject{
 public:
     virtual ~Order() = 0;
     virtual string getLabel() const = 0;
     virtual bool validate() const = 0;
     virtual void execute() const = 0;
+
+    // Observer pattern implementation
+    std::string stringToLog() const override {
+    }
 
 private:
     virtual ostream& print(ostream&) const = 0;
@@ -103,7 +108,7 @@ public:
 };
 
 // Manages a collection of order pointers, supports adding, removing, moving and executing
-class OrdersList {
+class OrdersList : ILoggable , Subject{
 public:
     OrdersList();
     ~OrdersList();
@@ -112,6 +117,10 @@ public:
     void remove(int index);
     void move(int from, int to);
     void executeOrders();
+
+    // Observer pattern implementation
+    std::string stringToLog() const override {
+    }
 
 private:
     vector<Order*> orders_;

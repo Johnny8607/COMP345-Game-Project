@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include "LoggingObserver.h"
 
 /*
  * Command
@@ -10,7 +11,7 @@
  * Represents a single command entered by the user (or read from a file)
  * and stores the effect/result of executing the command.
  */
-class Command {
+class Command : public ILoggable , public Subject {
 public:
     // Rule of Three
     explicit Command(const std::string& command);
@@ -27,6 +28,10 @@ public:
 
     // Stream insertion operator
     friend std::ostream& operator<<(std::ostream& out, const Command& cmd);
+
+    // Observer pattern implementation
+    std::string stringToLog() const override {
+    }
 
 private:
     std::string command;  // The command string

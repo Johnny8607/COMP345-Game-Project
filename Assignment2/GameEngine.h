@@ -2,8 +2,9 @@
 #define GAMEENGINE_H
 
 #include <string>
+#include "LoggingObserver.h"
 
-class GameEngine
+class GameEngine : ILoggable , Subject
 {
 private:
     std::string currentState;
@@ -58,6 +59,10 @@ public:
     void executeOrdersPhase();
 
     
+    
+    // Observer pattern implementation
+    std::string stringToLog() const override {
+    }
 
 private:
     /**

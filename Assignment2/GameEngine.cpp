@@ -186,6 +186,12 @@ void GameEngine::transition(const std::string &newState)
     std::cout << "Transitioning from '" << currentState
               << "' to '" << newState << "'." << std::endl;
     currentState = newState;
+    Notify(this);
+}
+
+// Observer Pattern Implementation
+std::string GameEngine::stringToLog() const{
+    return "Game Engine new state: " + currentState;
 }
 
 /**

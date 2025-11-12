@@ -66,6 +66,7 @@ void CommandProcessor::readCommand() {
 
 void CommandProcessor::saveCommand(Command* c) {
     commands->push_back(c);
+    Notify(this); // Observer Pattern
 }
 
 Command* CommandProcessor::getCommand(size_t index) const {
@@ -93,6 +94,13 @@ std::ostream& operator<<(std::ostream& out, const CommandProcessor& cp) {
         << ", Commands=" << cp.commands->size() << "]";
     return out;
 }
+
+// Observer Pattern Implementation
+std::string CommandProcessor::stringToLog() const{
+    return "Command: " + commands->back()->getCommand();
+}
+
+
 
 // ================================================================
 // FileCommandProcessorAdapter Implementation

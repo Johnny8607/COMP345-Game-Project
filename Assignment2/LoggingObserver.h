@@ -2,7 +2,6 @@
 #include <list>
 #include <iostream>
 #include <fstream>
-#include "CommandProcessing.h"
 using namespace std;
 
 //Forward declarations
