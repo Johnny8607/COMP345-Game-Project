@@ -19,9 +19,8 @@ using std::string;
  * Abstract base class for all game orders.
  * Every order supports validation, execution, cloning, and printing.
  */
-class Order {
 //Abstract base class for all order types
-class Order : ILoggable , Subject{
+class Order : public ILoggable, public Subject{
 public:
     virtual ~Order() = 0;                     // Pure virtual destructor
     virtual string getLabel() const = 0;      // Get order name
@@ -158,7 +157,7 @@ public:
 };
 
 // Manages a collection of order pointers, supports adding, removing, moving and executing
-class OrdersList : ILoggable , Subject{
+class OrdersList : public ILoggable, public Subject{
 public:
     OrdersList();
     ~OrdersList();

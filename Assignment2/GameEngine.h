@@ -10,7 +10,7 @@ class Player;
 class Deck;
 class MapLoader;
 
-class GameEngine : ILoggable , Subject
+class GameEngine : public ILoggable , public Subject
 {
 public:
     /**

@@ -166,13 +166,13 @@ ostream& operator<<(ostream& out, const OrdersList& ol) {
 }
 
 // Observer Pattern Implementation orderlist
-std::string OrdersList::stringToLog() const{
-    return "Order Issued: " + orders_->back()->getLabel();
-}
+// std::string OrdersList::stringToLog() const{
+//     return "Order Issued: " + orders_->back()->getLabel();
+// }
 
 // Observer Pattern Implementation order execute
-std::string OrdersList::stringToLog() const{
-    return "Order Executed: " + this.Label();
+std::string Order::stringToLog() const{
+    return "Order Executed: " + getLabel();
 }
 
 // =====================  ORDER SUBCLASSES  =====================
@@ -322,7 +322,8 @@ void Deploy::execute()   const {
     player->setReinforcementPool(player->getReinforcementPool() - armies);
     target->setArmies(target->getArmies() + armies);
     cout << armies << " armies deployed to " << target->getName() << ". Total: " << target->getArmies() << "\n"; 
-    Notify(this);}
+    // Notify(this);
+}
 
 /**
  * - Executes Advance order.
@@ -361,7 +362,8 @@ void Advance::execute()  const {
         source->setArmies(source->getArmies() + atkLeft);
         cout << "Attack failed.\n";
     }
-    Notify(this);}
+    // Notify(this);
+}
 
 /**
  * - Executes Bomb order.
@@ -372,7 +374,8 @@ void Bomb::execute() const {
     int old = target->getArmies();
     target->setArmies(old / 2);
     cout << "Bomb exploded on " << target->getName() << "! Armies: " << old << " -> " << target->getArmies() << "\n";
-    Notify(this);}
+    // Notify(this);
+    }
 /**
  * - Executes Blockade order.
  * - Doubles armies on the territory and transfers ownership to Neutral player.
@@ -386,7 +389,8 @@ void Blockade::execute() const {
 
     cout << "Blockade applied to " << target->getName()
          << ", armies doubled and territory turned neutral.\n";
-    Notify(this);}
+    // Notify(this);
+    }
 /**
  * - Executes Airlift order.
  * - Transfers armies between two territories owned by the same player.
@@ -396,7 +400,8 @@ void Airlift::execute() const {
     source->setArmies(source->getArmies() - armies);
     target->setArmies(target->getArmies() + armies);
     cout << "Airlift moved " << armies << " from " << source->getName() << " to " << target->getName() << "\n"; 
-    Notify(this);}
+    // Notify(this);
+    }
 /**
  * - Executes Negotiate order.
  * - Establishes ceasefire (no attacks) between two players this turn.
@@ -405,7 +410,8 @@ void Negotiate::execute()const {   if (!validate()) return;
     player->addCeasefire(targetPlayer);
     targetPlayer->addCeasefire(player);
     cout << "Ceasefire established between " << player->getName() << " and " << targetPlayer->getName() << ".\n"; 
-    Notify(this);}
+    // Notify(this);
+    }
 
 
 //Destructors for all subclasses.

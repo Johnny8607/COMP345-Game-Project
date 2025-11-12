@@ -4,25 +4,27 @@
 #include "CommandProcessing.h"
 #include "GameEngine.h"
 
-void testLoggingObserver(){
+void testLoggingObserver() {
 
 
     // Create the log observer
-    LogObserver logger();
+    LogObserver logger;
     
     // Create subjects
 
     CommandProcessor processor;
-    OrderList orderList;
+    OrdersList orderList;
     GameEngine engine;
     
     // Attach observer to all subjects
     
-    processor.attach(&logger);
-    orderList.attach(&logger);
-    engine.attach(&logger);
+    processor.Attach(&logger);
+    orderList.Attach(&logger);
+    engine.Attach(&logger);
     
     
-
-
+    // Detach observer and release allocated memory
+    processor.Detach(&logger);
+    orderList.Detach(&logger);
+    engine.Detach(&logger);
 }

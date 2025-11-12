@@ -12,7 +12,7 @@
  *
  * Reads commands from console, validates them, stores them, and tracks game state.
  */
-class CommandProcessor : ILoggable, Subject{
+class CommandProcessor : public ILoggable, public Subject{
 public:
     // Rule of Three
     CommandProcessor();
@@ -60,10 +60,6 @@ public:
     size_t getFileCommandsCount() const;
 
     friend std::ostream& operator<<(std::ostream& out, const FileCommandProcessorAdapter& adapter);
-
-    // Observer pattern implementation
-    std::string stringToLog() const override {
-    }
 
 private:
     std::vector<std::string>* fileCommands;  // Commands loaded from file

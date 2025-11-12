@@ -38,6 +38,7 @@ void Subject::Notify(ILoggable* loggable){
     for (; i != _observers->end(); ++i)
         (*i)->Update(loggable);
 }
+
 //LogObserver class implementation
 LogObserver::LogObserver(){
     logFile.open("gamelog.txt", std::ios::out | std::ios::app);
@@ -46,13 +47,13 @@ LogObserver::LogObserver(){
     }
 }
 
-LogObserver::~LogObserver(){
+LogObserver::~LogObserver() {
     if (logFile.is_open()){
         logFile.close();
     }
 }
 
-void LogObserver::update(ILoggable* loggable){
+void LogObserver::Update(ILoggable* loggable){
     if(logFile.is_open() && loggable != nullptr){
         logFile << loggable->stringToLog() << endl;
         logFile.flush();

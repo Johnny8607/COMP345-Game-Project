@@ -20,7 +20,7 @@ class Observer
 {
 private:
 public:
-    ~Observer();
+    ~Observer() = default;
     virtual void Update(ILoggable* loggable) = 0;
 protected:
     Observer();
@@ -46,6 +46,6 @@ std::ofstream logFile;
 public:
 LogObserver();
 ~LogObserver();
-void update(ILoggable* loggable);
+void Update(ILoggable* loggable) override;
 };
 

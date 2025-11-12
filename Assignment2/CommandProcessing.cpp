@@ -181,3 +181,4 @@ std::ostream& operator<<(std::ostream& out, const FileCommandProcessorAdapter& a
         << ", nextIndex=" << adapter.currentIndex << "]";
     return out;
 }
+
