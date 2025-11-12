@@ -5,13 +5,14 @@
 #include <vector>
 #include <iostream>
 #include "Command.h"
+#include "LoggingObserver.h"
 
 /*
  * CommandProcessor
  *
  * Reads commands from console, validates them, stores them, and tracks game state.
  */
-class CommandProcessor {
+class CommandProcessor : public ILoggable, public Subject{
 public:
     // Rule of Three
     CommandProcessor();
@@ -31,7 +32,11 @@ public:
     // Stream insertion
     friend std::ostream& operator<<(std::ostream& out, const CommandProcessor& cp);
 
-protected:
+    // Observer pattern implementation
+    std::string stringToLog() const override {
+    }
+
+    protected:
     bool validate(const std::string& command) const; // Validate command for current state
 
     std::string* currentState;          // Current game state

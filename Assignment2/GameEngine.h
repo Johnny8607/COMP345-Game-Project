@@ -2,6 +2,7 @@
 #define GAMEENGINE_H
 
 #include <string>
+#include "LoggingObserver.h"
 #include <vector>
 
 class Map;
@@ -9,7 +10,7 @@ class Player;
 class Deck;
 class MapLoader;
 
-class GameEngine
+class GameEngine : public ILoggable , public Subject
 {
 public:
     /**
@@ -72,6 +73,12 @@ public:
     static void setNeutralPlayer(Player* p);
     void addPlayer(Player* player);               // Register a new player
     void simulateStartup();
+
+    
+    
+    // Observer pattern implementation
+    std::string stringToLog() const override {
+    }
 
 private:
     std::string currentState;

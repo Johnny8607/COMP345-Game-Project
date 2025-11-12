@@ -10,6 +10,7 @@ void testStartupPhase();
 void testMainGameLoop();
 void testOrdersLists();
 void testOrderExecution();
+void testLoggingObserver();
 
 void pressEnterToContinue()
 {
@@ -55,6 +56,7 @@ int main()
     std::cout << "==============================\n"
               << std::endl;
     testGameStates();
+    pressEnterToContinue();
 
     std::cout << "\n******************************\n"
               << std::endl;
@@ -83,6 +85,13 @@ int main()
     std::cout << "==============================\n"
               << std::endl;
     testOrderExecution();
+    pressEnterToContinue();
+    
+    
+    
+    std::cout << "Testing Assignment 2 Part 5: Logging Observer" << std::endl;
+    std::cout << "==============================\n" << std::endl;
+    testLoggingObserver();
     pressEnterToContinue();
 
     return 0;
