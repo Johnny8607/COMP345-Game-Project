@@ -54,12 +54,10 @@ public:
      */
     std::string getCurrentState() const;
 
-    // --- NEW: A2 GETTERS ---
     std::vector<Player*>& getPlayers();
     Map* getMap();
-    // --- END NEW ---
+    Deck * getDeck() { return deck; }
 
-    // --- NEW FOR A2 ---
     /**
      * @brief A placeholder for A2 Part 2.
      * Manually sets up the game state so the main loop can run.
@@ -73,15 +71,13 @@ public:
     static Player* getNeutralPlayer();            // Get (or create) neutral player
     static void setNeutralPlayer(Player* p);
     void addPlayer(Player* player);               // Register a new player
-    // --- END NEW ---
+    void simulateStartup();
 
 private:
     std::string currentState;
     Map* map;
     Deck* deck;
-    // --- NEW FOR A2 ---
     static Player* neutralPlayer;        // -- Neutral player pointer
-    // --- END NEW ---
     std::vector<Player*> players;
     /**
      * Transitions the game engine to a new state
@@ -105,7 +101,6 @@ private:
      */
     void shufflePlayerOrder();
 
-    // --- NEW FOR A2 PART 3 (HELPERS) ---
     /**
      * @brief Checks if a win condition has been met.
      */
@@ -115,7 +110,6 @@ private:
      * @brief Removes players with no territories from the game.
      */
     void removeEliminatedPlayers();
-    // --- END NEW ---
 };
 
 #endif

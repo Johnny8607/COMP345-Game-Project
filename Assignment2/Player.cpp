@@ -3,27 +3,24 @@
 #include "Hand.h" // Hand, cards
 #include "Orders.h" // Orders, OrdersList
 #include "GameEngine.h"
+#include "Cards.h"
 #include <algorithm> // Operations, vector
 #include <random>
 
 // Constructor using 'new' dynamic memory allocation for name, territories, hand, orders
 Player::Player(const std::string& name)
     : name(name), territories(new std::vector<Territory*>()), hand(new Hand()), orders(new OrdersList()),
-    // --- NEW FOR A2 PART 3 ---
       reinforcementPool(0),
       DoneIssuingOrders(false),
       ConqueredTerritoryThisTurn(false)
-      // --- END NEW ---
     {}
 
 // Copy constructor for copying and creating from an existing player
 Player::Player(const Player& other)
     : name(other.name), territories(nullptr), hand(nullptr), orders(nullptr),
-    // --- NEW FOR A2 PART 3 ---
       reinforcementPool(other.reinforcementPool),
       DoneIssuingOrders(other.DoneIssuingOrders),
       ConqueredTerritoryThisTurn(other.ConqueredTerritoryThisTurn)
-    // --- END NEW ---
     {
     copyFrom(other);
 }
@@ -35,11 +32,9 @@ Player& Player::operator=(const Player& other) {
         name = other.name;
         copyFrom(other);
     }
-    // --- NEW FOR A2 PART 3 ---
         reinforcementPool = other.reinforcementPool;
         DoneIssuingOrders = other.DoneIssuingOrders;
         ConqueredTerritoryThisTurn = other.ConqueredTerritoryThisTurn;
-    // --- END NEW ---
     return *this;
 }
 
@@ -101,7 +96,6 @@ OrdersList* Player::getOrders() const {
     return orders;
 }
 
-// --- NEW FOR A2 ---
 // Returns true if this player currently has a ceasefire agreement with `other`.
 bool Player::isCeasefireWith(Player* other) const {
     for (auto* p : ceasefirePlayers)
@@ -130,7 +124,6 @@ bool Player::hasAdjacentTerritory(Territory* target) const {
     }
     return false;
 }
-// --- END ---
 
 void Player::playCard(Deck *deck) {
     auto& cards = hand->getAllCards();
@@ -186,16 +179,19 @@ std::vector<Territory*> Player::toAttack() const {
     return selection;
 }
 
-// Create and add order to list if possible
-void Player::issueOrder(const std::string& orderType) {
-    OrderFactory factory;
-    Order* order = factory.createOrder(orderType);
-    if (order) {
-        orders->addOrder(order);
+void Player::issueOrder(const std::string& type)
+{
+    // ONLY HERE TO MAKE PlayerDriver COMPILE
+    if (type == "deploy") {
+        cout << name << " issues DEPLOY (stub)" << endl;
+        orders->addOrder(new Deploy()); // stub only
+    }
+    else if (type == "advance") {
+        cout << name << " issues ADVANCE (stub)" << endl;
+        orders->addOrder(new Advance());
     }
 }
 
-// --- NEW FOR A2 PART 3 ---
 
 /**
  * @return The number of armies in the player's reinforcement pool.
@@ -258,41 +254,95 @@ void Player::setReinforcementPool(int value) {
  * @brief The main decision-making method for a player.
  * This implements the logic described in the "Orders Issuing phase".
  */
-void Player::issueOrder(GameEngine* game) {
-    
-    // "As long as the player has army units in their reinforcement pool...
-    // it will issue a deploy order and no other order."
-    if (reinforcementPool > 0) {
-        // --- PLACEHOLDER ---
-        // A real implementation would use toDefend() to pick a territory.
-        // This stub just deploys 3 armies to the first available territory.
-        
-        int armiesToDeploy = std::min(3, reinforcementPool); // Deploy 3 or all remaining
-        reinforcementPool -= armiesToDeploy;
-        
-        std::cout << "Player " << name << " issuing DEPLOY of " << armiesToDeploy << "(hard coded) armies." << std::endl;
-        issueOrder("deploy"); // Use A1 factory to create a stub "deploy" order
-        return; // One order issued, done for this round-robin tick.
+void Player::issueOrder(GameEngine* engine)
+{
+    cout << "Player " << name << " issuing an order..." << endl;
+
+    if (reinforcementPool <= 0 && (territories->empty() || (toDefend().empty() && toAttack().empty())) 
+        && hand->getAllCards().empty())
+    {
+        cout << "Player " << name << " has no more actions to issue." << endl;
+        DoneIssuingOrders = true;
+        return;
     }
 
-    // "Once it has deployed all... it can proceed with other kinds of orders." [cite: 128]
-    // --- PLACEHOLDER ---
-    // A real implementation would use toAttack() or playCard().
-    // This stub just issues one "advance" order and then finishes.
-    
-    // Check if we have already issued our one "advance" order
-    if (orders->getOrders().size() == 0 || orders->getOrders().back()->getLabel() == "Deploy") {
-        std::cout << "Player " << name << " issuing ADVANCE (stub)." << std::endl;
-        issueOrder("advance"); // Use A1 factory to create a stub "advance" order
-        return; // One order issued.
+    // 1. Deploy orders while reinforcements remain
+    if (reinforcementPool > 0)
+    {
+        int deployAmount = std::min(3, reinforcementPool);
+
+        Territory* target = nullptr;
+        auto defendList = toDefend();
+        if (!defendList.empty())
+            target = defendList.front();
+        else if (!territories->empty())
+            target = territories->at(0);
+
+        if (target)
+        {
+            cout << name << " => DEPLOY on " << target->getName()
+                 << " (" << deployAmount << " armies)" << endl;
+            orders->addOrder(new Deploy(this, target, deployAmount));
+        }
+
+        reinforcementPool -= deployAmount;
+        if (reinforcementPool > 0) {
+            // still have more to deploy later
+            return; 
+        }
     }
 
-    // If we get here, we have deployed and issued our one advance order.
-    // We signify that we are done for the turn.
-    setDoneIssuingOrders(true);
+    // 2. Advance once per round
+    {
+        auto defendList = toDefend();
+        auto attackList = toAttack();
+
+        if (!defendList.empty() && !attackList.empty())
+        {
+            Territory* src = defendList.front();
+            Territory* tgt = attackList.front();
+
+            cout << name << " => ADVANCE (attack)" << endl;
+            orders->addOrder(new Advance(this, src, tgt, 1));
+            DoneIssuingOrders = true; // after one advance, stop for this round
+            return;
+        }
+
+        if (defendList.size() >= 2)
+        {
+            Territory* src = defendList[0];
+            Territory* tgt = defendList[1];
+
+            cout << name << " => ADVANCE (defend)" << endl;
+            orders->addOrder(new Advance(this, src, tgt, 1));
+            DoneIssuingOrders = true;
+            return;
+        }
+    }
+
+    // 3. Play one card if available
+    if (!hand->getAllCards().empty() && !hasPlayedCardThisRound)
+    {
+        Card* card = hand->getAllCards().back();
+        cout << name << " => plays a card" << endl;
+
+        Order* cardOrder = card->play(this);
+        if (cardOrder)
+            orders->addOrder(cardOrder);
+
+        hand->removeLastCard();
+        hasPlayedCardThisRound = true;
+
+        // after playing one card, done for now
+        DoneIssuingOrders = true;
+        return;
+    }
+
+    // 4. nothign left => DONE
+    cout << "Player " << name << " => done issuing orders." << endl;
+    DoneIssuingOrders = true;
 }
 
-// --- END NEW ---
 
 // Stream insertion for help printing Player object in specified format
 std::ostream& operator<<(std::ostream& os, const Player& player) {

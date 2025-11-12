@@ -72,6 +72,9 @@ void testMainGameLoop()
     // First, run the Part 2 placeholder to set up the game
     game->startupPhase();
     
+    // SIMULATE STARTUP IF NEEDED
+    // game->simulateStartup();
+
     // Get players for testing
     Player* p1 = game->getPlayers()[0]; // 3 territories
     Player* p2 = game->getPlayers()[1]; // 1 territory

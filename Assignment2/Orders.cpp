@@ -71,16 +71,16 @@ void OrdersList::addOrder(Order* order) {
         return;
     }
     orders_.push_back(order);
-     cout << "\n=========== ADDING ORDERS ===========\n";
-    cout << "No.  | Order\n";
-    cout << "----------------\n";
+    // cout << "\n=========== ADDING ORDERS ===========\n";
+    // cout << "No.  | Order\n";
+    // cout << "----------------\n";
 
-    // Print each order in the table
-    for (size_t i = 0; i < orders_.size(); ++i) {
-        cout << (i + 1) << "    | " << orders_[i]->getLabel() << "\n";
-    }
+    // // Print each order in the table
+    // for (size_t i = 0; i < orders_.size(); ++i) {
+    //     cout << (i + 1) << "    | " << orders_[i]->getLabel() << "\n";
+    // }
 
-    cout << "----------------\n";
+    // cout << "----------------\n";
 }
 
 /**
@@ -137,6 +137,9 @@ void OrdersList::executeOrders() {
     cout << "All orders executed and cleared.\n";
 }
 
+vector<Order*>& OrdersList::getOrders() {
+    return orders_;
+}
 
 /**
  * Stream insertion operator for printing the current list of orders.

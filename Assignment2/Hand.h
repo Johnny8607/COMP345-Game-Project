@@ -24,7 +24,9 @@ class Hand {
         int size() const;
         void addCard(Card* card);
         void removeCard(Card* card);
-        std::vector<Card*>& getAllCards() const;
+        void removeLastCard();
+        std::vector<Card*>& getAllCards();
+        const std::vector<Card*>& getAllCards() const;
     };
 
 // stream insertion operator

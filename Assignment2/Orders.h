@@ -170,6 +170,7 @@ public:
     void clear(); // Delete all orders from list
 
     const vector<Order*>& getOrders() const { return orders_; } // Read-only access
+    vector<Order*>& getOrders();  //nonconst getter
 
 private:
     vector<Order*> orders_;
