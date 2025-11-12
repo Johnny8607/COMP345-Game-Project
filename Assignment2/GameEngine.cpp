@@ -3,9 +3,11 @@
 #include <sstream>
 #include <fstream>
 #include <filesystem>
+#include <vector>
 #include <random>
 #include <chrono>
 #include <cmath>
+
 
 #include "Map.h"
 #include "Player.h"
@@ -69,8 +71,6 @@ GameEngine::~GameEngine()
         delete p;
     }
     players.clear(); // Clear the vector itself
-    
-    std::cout << "GameEngine destroyed." << std::endl;
 }
 
 /**
@@ -332,7 +332,7 @@ void GameEngine::distributeTerritories()
         return;
     }
     
-    // Shuffle territories for random distribution
+    // Shuffle territories randomly and equally
     std::random_device rd;
     std::mt19937 gen(rd());
     std::shuffle(territories->begin(), territories->end(), gen);
@@ -350,27 +350,24 @@ void GameEngine::distributeTerritories()
         }
     }
     
-    std::cout << "Territories distributed fairly among " << players.size() << " players." << std::endl;
+    std::cout << "Territories distributed fairly and equally among " << players.size() << " players." << std::endl;
 }
 
 
 // Helper function to shuffle player order randomly
 void GameEngine::shufflePlayerOrder()
 {
-    // FIX: 'players' is an object. Removed '!' check.
     if (players.empty()) {
-        return;
+        return; // No players to shuffle
     }
     
     std::random_device rd;
     std::mt19937 gen(rd());
-    // FIX: Use '.' access, not '->'.
     std::shuffle(players.begin(), players.end(), gen);
     
     std::cout << "Player order randomized." << std::endl;
     std::cout << "Play order: ";
     for (size_t i = 0; i < players.size(); ++i) {
-        // FIX: Access 'players' object with '[]', not '(*players)[]'.
         std::cout << players[i]->getName();
         if (i < players.size() - 1) {
             std::cout << " -> ";
@@ -380,20 +377,21 @@ void GameEngine::shufflePlayerOrder()
 }
 
 /**
- * Startup phase method - implements command-based user interaction for game startup
- * Part 2 Requirement: Implements the game startup phase with commands:
- * - loadmap <filename>: Load a map from directory
- * - validatemap: Validate the loaded map
- * - addplayer <playername>: Add players (2-6 players)
- * - gamestart: Start the game (distribute territories, randomize order, give initial armies, draw cards)
+ * Startup phase method
+ * Commands available - Part 2:
+ *
+ * loadmap <filename>: Load a map from directory
+ * validatemap: Validate loaded map
+ * addplayer <playername>: Add players (2-6 players)
+ * gamestart: Start game (distribute territories, randomize play order, give 50 initial armies, draw 2 cards)
  */
 void GameEngine::startupPhase()
 {
     std::cout << "\n=== GAME STARTUP PHASE ===" << std::endl;
-    std::cout << "Available commands:" << std::endl;
-    std::cout << "  loadmap <filename> - Load a map file" << std::endl;
-    std::cout << "  validatemap - Validate the loaded map" << std::endl;
-    std::cout << "  addplayer <playername> - Add a player (2-6 players required)" << std::endl;
+    std::cout << "Available user commands:" << std::endl;
+    std::cout << "  loadmap <filename> - Load map file from directory" << std::endl;
+    std::cout << "  validatemap - Validate loaded map" << std::endl;
+    std::cout << "  addplayer <playername> - Add a player (2-6 player limit)" << std::endl;
     std::cout << "  gamestart - Start the game" << std::endl;
     std::cout << "  quit - Exit startup phase\n" << std::endl;
     
@@ -402,16 +400,16 @@ void GameEngine::startupPhase()
     bool mapValidated = false;
     
     while (true) {
-        std::cout << "Enter command: ";
+        std::cout << "\nEnter command: ";
         std::getline(std::cin, input);
         
         if (input.empty()) {
             continue;
         }
         
-        std::istringstream iss(input);
+        std::istringstream iss(input); 
         std::string command;
-        iss >> command;
+        iss >> command; // Store first input string into command variable
         
         // Handle loadmap command
         if (command == "loadmap") {
@@ -521,22 +519,26 @@ void GameEngine::startupPhase()
             
             std::cout << "\n=== STARTING GAME ===" << std::endl;
             
-            // a) Fairly distribute all territories to players
+            // a)Fairly distribute all territories to players
             distributeTerritories();
             
-            // b) Determine randomly the order of play
+            // b)Determine randomly the order of play
             shufflePlayerOrder();
             
-            // c) Give 50 initial army units to players (in reinforcement pool)
+            // c)Give 50 initial army units to players (in reinforcement pool)
             for (Player* player : players) {
                 if (player) {
                     player->addToReinforcementPool(50);
-                    std::cout << "Player " << player->getName() << " receives 50 initial army units." << std::endl;
                 }
             }
             
-            // d) Let each player draw 2 initial cards from the deck
-            // First, ensure deck has enough cards
+            // d)Let each player draw 2 initial cards from the deck
+            // Initialize deck if it doesn't exist
+            if (!deck) {
+                deck = new Deck();
+            }
+            
+            // Check if enough deck size
             if (deck->size() < players.size() * 2) {
                 // Add some cards to deck if needed (create a basic deck)
                 for (int i = 0; i < 20; ++i) {
@@ -558,10 +560,19 @@ void GameEngine::startupPhase()
                 }
             }
             
-            // e) Switch the game to the play phase
+            // Print player hands after drawing cards
+            std::cout << "\n=== Player Hands ===" << std::endl;
+            for (Player* player : players) {
+                if (player && player->getHand()) {
+                    std::cout << "Player " << player->getName() << "'s hand:" << std::endl;
+                    std::cout << *player->getHand() << std::endl;
+                }
+            }
+            
+            // e)Switch the game to the play phase
             transition("assign reinforcement");
             std::cout << "\n=== GAME STARTED ===" << std::endl;
-            std::cout << "Game is now in play phase. Startup phase complete." << std::endl;
+            std::cout << "Game is now in play phase. Startup phase complete!" << std::endl;
             break;
         }
         // Handle quit command
@@ -888,3 +899,4 @@ void GameEngine::simulateStartup()
 
     std::cout << "=== Simulated Startup Complete ===" << std::endl;
 }
+
