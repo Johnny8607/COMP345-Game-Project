@@ -39,30 +39,37 @@ void testLoggingObserver() {
     assert(dynamic_cast<ILoggable*>(&engine) != nullptr);
     cout << "✓ GameEngine is subclass of Subject and ILoggable" << endl;
 
-    // Test 3: Verify gamelog.txt is being written
-    cout << "\n--- Test 3: File Writing Verification ---" << endl;
-    ifstream logFile("gamelog.txt");
-    assert(logFile.is_open());
-    
-    string line;
-    int lineCount = 0;
-    while (getline(logFile, line)) {
-        lineCount++;
-        cout << "Log Entry " << lineCount << ": " << line << endl;
+   
+    // Test 2: Command processor test (file processor)
+    cout << "\n--- Test 4: CommandProcessor Notifications ---" << endl;
+    FileCommandProcessorAdapter fileProcessor("testCommands.txt");
+    fileProcessor.Attach(&logger);
+    size_t total = fileProcessor.getFileCommandsCount();
+    for (size_t i = 0; i < total; ++i) {
+        fileProcessor.readCommandFromFile();
     }
-    logFile.close();
-    
-    assert(lineCount >= 3); // Should have at least 3 command entries
-    cout << "✓ gamelog.txt is correctly written with command entries" << endl;
 
-    // Test 4: OrderList::addOrder() notification
-    cout << "\n--- Test 4: OrderList Notifications ---" << endl;
+    // Test 3: Order Test
+    cout << "\n--- Test 3: Order Notifications ---" << endl;
+    Deploy testDeploy;
+    orderList.addOrder(&testDeploy);
+    Advance testAdvance;
+    orderList.addOrder(&testAdvance);
+    Bomb testBomb;
+    orderList.addOrder(&testBomb);
+    orderList.executeOrders();
 
-    // Test 5: Order execution notifications
-    cout << "\n--- Test 5: Order Execution Notifications ---" << endl;
-    
-    // Test 6: GameEngine state transition notifications
-    cout << "\n--- Test 6: GameEngine State Transition Notifications ---" << endl;
+    // Test 4: GameEngine state transition notifications
+    cout << "\n--- Test 4: GameEngine State Transition Notifications ---" << endl;
+    engine.processCommand("start");
+    engine.processCommand("loadmap");
+    engine.processCommand("validatemap");
+    engine.processCommand("addplayer");
+    engine.processCommand("assigncountries");
+    engine.processCommand("issueorder");
+    engine.processCommand("endissueorders");
+    engine.processCommand("endexecorders");
+    engine.processCommand("win");
 
 // Final verification: Check complete log file
     cout << "\n--- Final Log File Verification ---" << endl;
@@ -76,7 +83,7 @@ void testLoggingObserver() {
         cout << "Log Entry " << lineCount << ": " << line << endl;
     }
     logFile.close();
-    
+
     cout << "\n=== Logging Observer Test Completed Successfully! ===" << endl;
     cout << "Check gamelog.txt for complete log of all operations." << endl;
     

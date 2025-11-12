@@ -75,9 +75,6 @@ void OrdersList::addOrder(Order* order) {
     // cout << "\n=========== ADDING ORDERS ===========\n";
     // cout << "No.  | Order\n";
     // cout << "----------------\n";
-    cout << "\n=========== ADDING ORDERS ===========\n";
-    cout << "No.  | Order\n";
-    cout << "----------------\n";
 
     // // Print each order in the table
     // for (size_t i = 0; i < orders_.size(); ++i) {
@@ -318,7 +315,7 @@ bool Negotiate::validate()const {
  * - Executes Deploy order.
  * - Deducts armies from reinforcement pool and adds them to the target territory.
  */
-void Deploy::execute() const { 
+void Deploy::execute() { 
     if (!validate()) return;
     player->setReinforcementPool(player->getReinforcementPool() - armies);
     target->setArmies(target->getArmies() + armies);
@@ -331,7 +328,7 @@ void Deploy::execute() const {
  * - Moves armies or attacks enemy territory with dice-based casualty simulation.
  * - Conquers territory if defender loses all armies.
  */
-void Advance::execute()  const {  
+void Advance::execute()  {  
     if (!validate()) return;
     cout << "Executing Advance from " << source->getName() << " ->" << target->getName() << " (Army number: " << armies << ")\n";
     source->setArmies(source->getArmies() - armies);
@@ -363,25 +360,25 @@ void Advance::execute()  const {
         source->setArmies(source->getArmies() + atkLeft);
         cout << "Attack failed.\n";
     }
-    // Notify(this);
+    Notify(this);
 }
 
 /**
  * - Executes Bomb order.
  * - Halves the number of armies on the target enemy territory.
  */
-void Bomb::execute() const { 
+void Bomb::execute()  { 
     if (!validate()) return;
     int old = target->getArmies();
     target->setArmies(old / 2);
     cout << "Bomb exploded on " << target->getName() << "! Armies: " << old << " -> " << target->getArmies() << "\n";
-    // Notify(this);
+    Notify(this);
     }
 /**
  * - Executes Blockade order.
  * - Doubles armies on the territory and transfers ownership to Neutral player.
  */
-void Blockade::execute() const { 
+void Blockade::execute() { 
      if (!validate()) return;
 
     target->setArmies(target->getArmies() * 2);
@@ -390,29 +387,29 @@ void Blockade::execute() const {
 
     cout << "Blockade applied to " << target->getName()
          << ", armies doubled and territory turned neutral.\n";
-    // Notify(this);
+    Notify(this);
     }
 /**
  * - Executes Airlift order.
  * - Transfers armies between two territories owned by the same player.
  */
-void Airlift::execute() const {  
+void Airlift::execute()  {  
     if (!validate()) return;
     source->setArmies(source->getArmies() - armies);
     target->setArmies(target->getArmies() + armies);
     cout << "Airlift moved " << armies << " from " << source->getName() << " to " << target->getName() << "\n"; 
-    // Notify(this);
+    Notify(this);
     }
 /**
  * - Executes Negotiate order.
  * - Establishes ceasefire (no attacks) between two players this turn.
  */
-void Negotiate::execute()const {   
+void Negotiate::execute() {   
     if (!validate()) return;
     player->addCeasefire(targetPlayer);
     targetPlayer->addCeasefire(player);
     cout << "Ceasefire established between " << player->getName() << " and " << targetPlayer->getName() << ".\n"; 
-    //notify(this);
+    Notify(this);
     }
 
 
