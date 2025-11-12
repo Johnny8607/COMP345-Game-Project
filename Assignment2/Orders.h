@@ -22,7 +22,7 @@ public:
     virtual ~Order() = 0;                     // Pure virtual destructor
     virtual string getLabel() const = 0;      // Get order name
     virtual bool validate() const = 0;        // Check if order is legal
-    virtual void execute() const = 0;         // Apply order effect
+    virtual void execute()  = 0;         // Apply order effect
     virtual Order* clone() const = 0;         // Deep copy (polymorphic)
 
 protected:
@@ -47,7 +47,7 @@ public:
     Deploy(Player* p, Territory* t, int n) { player = p; target = t; armies = n; }
     string getLabel() const override;
     bool validate() const override;
-    void execute() const override;
+    void execute()  override;
     ~Deploy();
     Deploy* clone() const override { return new Deploy(*this); }
    
@@ -63,7 +63,7 @@ public:
     Advance(Player* p, Territory* s, Territory* t, int n) { player = p; source = s; target = t; armies = n; }
     string getLabel() const override;
     bool validate() const override;
-    void execute() const override;
+    void execute()  override;
     ~Advance();
     Advance* clone() const override { return new Advance(*this); }
    
@@ -79,7 +79,7 @@ public:
     Bomb(Player* p, Territory* t) { player = p; target = t; }
     string getLabel() const override;
     bool validate() const override;
-    void execute() const override;
+    void execute()  override;
     ~Bomb();
     
     Bomb* clone() const override { return new Bomb(*this); }
@@ -96,7 +96,7 @@ public:
     Blockade(Player* p, Territory* t) { player = p; target = t; }
     string getLabel() const override;
     bool validate() const override;
-    void execute() const override;
+    void execute()  override;
     ~Blockade();
      
     Blockade* clone() const override { return new Blockade(*this); }
@@ -113,7 +113,7 @@ public:
     Airlift(Player* p, Territory* s, Territory* t, int n) { player = p; source = s; target = t; armies = n; }
     string getLabel() const override;
     bool validate() const override;
-    void execute() const override;
+    void execute()  override;
     ~Airlift();
     
     Airlift* clone() const override { return new Airlift(*this); }
@@ -130,7 +130,7 @@ public:
     Negotiate(Player* p, Player* targetP) { player = p; targetPlayer = targetP; }
     string getLabel() const override;
     bool validate() const override;
-    void execute() const override;
+    void execute()  override;
     ~Negotiate();
     
      
