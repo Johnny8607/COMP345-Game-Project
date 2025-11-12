@@ -6,6 +6,7 @@ void testCards();
 void testGameStates();
 void testOrdersLists();
 void testCommandProcessor();
+void testLoggingObserver();
 
 void pressEnterToContinue() {
     std::cout << "Press Enter to continue...";
@@ -47,10 +48,18 @@ int main()
     std::cout << "==============================\n"
               << std::endl;
     testGameStates();
+    pressEnterToContinue();
 
     std::cout << "Testing Assignment 2 Part 1: Command Processor" << std::endl;
     std::cout << "==============================\n" << std::endl;
     testCommandProcessor();
+    pressEnterToContinue();
+    
+    
+    
+    std::cout << "Testing Assignment 2 Part 5: Logging Observer" << std::endl;
+    std::cout << "==============================\n" << std::endl;
+    testLoggingObserver();
     pressEnterToContinue();
 
     return 0;

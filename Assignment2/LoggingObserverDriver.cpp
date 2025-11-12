@@ -22,7 +22,7 @@ void testLoggingObserver(){
     orderList.attach(&logger);
     engine.attach(&logger);
     
-
+    
 
 
 }
