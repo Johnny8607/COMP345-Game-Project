@@ -136,24 +136,16 @@ void testMainGameLoop()
 }
 
 /**
- * Driver function to test the startup phase
- * Part 2 Requirement: Demonstrates that startup phase commands are implemented correctly
- * Supports both console input and file input (via stdin redirection)
- * 
- * Usage:
- *   - Console input: testStartupPhase("") or testStartupPhase()
- *   - File input: Redirect stdin or call with file commands
+ * Driver function to test the startup phase and commands
+ * Supports console and file input
  */
 void testStartupPhase()
 {
     std::cout << "\n=== TESTING STARTUP PHASE ===" << std::endl;
-    std::cout << "This function demonstrates the startup phase implementation." << std::endl;
-    std::cout << "Commands: loadmap <filename>, validatemap, addplayer <name>, gamestart" << std::endl;
-    std::cout << "For file input, redirect stdin: program < commands.txt" << std::endl;
     
     GameEngine engine;
     
-    // Call startupPhase which implements all the required functionality:
+    // Call startupPhase
     // 1) loadmap <filename> - select and load a map
     // 2) validatemap - validate the map
     // 3) addplayer <playername> - add 2-6 players

@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Map.h"
 #include "GameEngine.h"
+#include "LoggingObserver.h"
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -81,6 +82,7 @@ void OrdersList::addOrder(Order* order) {
     // }
 
     // cout << "----------------\n";
+    Notify(this);
 }
 
 /**
@@ -161,6 +163,15 @@ ostream& operator<<(ostream& out, const OrdersList& ol) {
     return out;
 }
 
+// Observer Pattern Implementation orderlist
+std::string OrdersList::stringToLog() const{
+    return "Order Issued: " + orders_.back()->getLabel();
+}
+
+// Observer Pattern Implementation order execute
+std::string Order::stringToLog() const{
+    return "Order Executed: " + getLabel();
+}
 
 // =====================  ORDER SUBCLASSES  =====================
 
@@ -304,18 +315,21 @@ bool Negotiate::validate()const {
  * - Executes Deploy order.
  * - Deducts armies from reinforcement pool and adds them to the target territory.
  */
-void Deploy::execute()    { 
+
+void Deploy::execute() { 
     if (!validate()) return;
     player->setReinforcementPool(player->getReinforcementPool() - armies);
     target->setArmies(target->getArmies() + armies);
-    cout << armies << " armies deployed to " << target->getName() << ". Total: " << target->getArmies() << "\n"; }
+    cout << armies << " armies deployed to " << target->getName() << ". Total: " << target->getArmies() << "\n"; 
+    Notify(this);
+}
 
 /**
  * - Executes Advance order.
  * - Moves armies or attacks enemy territory with dice-based casualty simulation.
  * - Conquers territory if defender loses all armies.
  */
-void Advance::execute()   {  
+void Advance::execute()  {  
     if (!validate()) return;
     cout << "Executing Advance from " << source->getName() << " ->" << target->getName() << " (Army number: " << armies << ")\n";
     source->setArmies(source->getArmies() - armies);
@@ -347,7 +361,8 @@ void Advance::execute()   {
         source->setArmies(source->getArmies() + atkLeft);
         cout << "Attack failed.\n";
     }
-    }
+    Notify(this);
+}
 
 /**
  * - Executes Bomb order.
@@ -358,12 +373,13 @@ void Bomb::execute()  {
     int old = target->getArmies();
     target->setArmies(old / 2);
     cout << "Bomb exploded on " << target->getName() << "! Armies: " << old << " -> " << target->getArmies() << "\n";
-}
+    Notify(this);
+    }
 /**
  * - Executes Blockade order.
  * - Doubles armies on the territory and transfers ownership to Neutral player.
  */
-void Blockade::execute()  { 
+void Blockade::execute() { 
      if (!validate()) return;
 
     target->setArmies(target->getArmies() * 2);
@@ -372,6 +388,7 @@ void Blockade::execute()  {
 
     cout << "Blockade applied to " << target->getName()
          << ", armies doubled and territory turned neutral.\n";
+    Notify(this);
     }
 /**
  * - Executes Airlift order.
@@ -381,15 +398,20 @@ void Airlift::execute()  {
     if (!validate()) return;
     source->setArmies(source->getArmies() - armies);
     target->setArmies(target->getArmies() + armies);
-    cout << "Airlift moved " << armies << " from " << source->getName() << " to " << target->getName() << "\n"; }
+    cout << "Airlift moved " << armies << " from " << source->getName() << " to " << target->getName() << "\n"; 
+    Notify(this);
+    }
 /**
  * - Executes Negotiate order.
  * - Establishes ceasefire (no attacks) between two players this turn.
  */
-void Negotiate::execute()  {   if (!validate()) return;
+void Negotiate::execute() {   
+    if (!validate()) return;
     player->addCeasefire(targetPlayer);
     targetPlayer->addCeasefire(player);
-    cout << "Ceasefire established between " << player->getName() << " and " << targetPlayer->getName() << ".\n"; }
+    cout << "Ceasefire established between " << player->getName() << " and " << targetPlayer->getName() << ".\n"; 
+    Notify(this);
+    }
 
 
 //Destructors for all subclasses.
