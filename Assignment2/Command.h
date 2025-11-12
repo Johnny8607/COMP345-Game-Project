@@ -30,8 +30,7 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const Command& cmd);
 
     // Observer pattern implementation
-    std::string stringToLog() const override {
-    }
+    std::string stringToLog() const override;
 
 private:
     std::string command;  // The command string

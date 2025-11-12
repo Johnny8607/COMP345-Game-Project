@@ -1,0 +1,14 @@
+Command: loadmap testmap.txt
+Command: validatemap
+Command: addplayer John
+Command: gamestart
+Order Issued: Deploy
+Order Issued: Advance
+Order Issued: Bomb
+Game Engine new state: map loaded
+Game Engine new state: map validated
+Game Engine new state: players added
+Game Engine new state: assign reinforcement
+Game Engine new state: issue orders
+Game Engine new state: execute orders
+Game Engine new state: assign reinforcement
