@@ -94,6 +94,13 @@ int main()
               << std::endl;
     testOrderExecution();
     pressEnterToContinue();
+    
+    
+    
+    std::cout << "Testing Assignment 2 Part 5: Logging Observer" << std::endl;
+    std::cout << "==============================\n" << std::endl;
+    testLoggingObserver();
+    pressEnterToContinue();
 
     // Start of assignment 2 part 5
     // std::cout << "Testing Assignment 2 Part 5: Game end" << std::endl;

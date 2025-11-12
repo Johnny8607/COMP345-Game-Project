@@ -21,6 +21,7 @@ Command::~Command() {}
 // Save effect string
 void Command::saveEffect(const std::string& effectStr) {
     effect = effectStr;
+    Notify(this); // Observer Pattern
 }
 
 // Accessors
@@ -31,4 +32,9 @@ std::string Command::getEffect() const { return effect; }
 std::ostream& operator<<(std::ostream& out, const Command& cmd) {
     out << cmd.command << " -> " << cmd.effect;
     return out;
+}
+
+// Observer Pattern Implementation
+std::string Command::stringToLog() const{
+    return "Command's Effect: " + effect;
 }
