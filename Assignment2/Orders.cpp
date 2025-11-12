@@ -315,6 +315,7 @@ bool Negotiate::validate()const {
  * - Executes Deploy order.
  * - Deducts armies from reinforcement pool and adds them to the target territory.
  */
+
 void Deploy::execute() { 
     if (!validate()) return;
     player->setReinforcementPool(player->getReinforcementPool() - armies);
