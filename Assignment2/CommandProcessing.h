@@ -33,8 +33,7 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const CommandProcessor& cp);
 
     // Observer pattern implementation
-    std::string stringToLog() const override {
-    }
+    std::string stringToLog() const override;
 
     protected:
     bool validate(const std::string& command) const; // Validate command for current state

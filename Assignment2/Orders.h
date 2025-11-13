@@ -28,8 +28,7 @@ public:
     virtual void execute()  = 0;         // Apply order effect
     virtual Order* clone() const = 0;         // Deep copy (polymorphic)
   // Observer pattern implementation
-    std::string stringToLog() const override {
-    }
+    std::string stringToLog() const override;
 protected:
     Player* player = nullptr;                 // Player issuing the order
     Territory* source = nullptr;              // Optional for movement
@@ -176,8 +175,7 @@ public:
     vector<Order*>& getOrders();  //nonconst getter
 
     // Observer pattern implementation
-    std::string stringToLog() const override {
-    }
+    std::string stringToLog() const override;
 
 private:
     vector<Order*> orders_;

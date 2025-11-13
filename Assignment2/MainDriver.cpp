@@ -95,8 +95,6 @@ int main()
     testOrderExecution();
     pressEnterToContinue();
     
-    
-    
     std::cout << "Testing Assignment 2 Part 5: Logging Observer" << std::endl;
     std::cout << "==============================\n" << std::endl;
     testLoggingObserver();
