@@ -251,13 +251,28 @@ void Player::setReinforcementPool(int value) {
 }
 
 /**
- * @brief The main decision-making method for a player.
- * This implements the logic described in the "Orders Issuing phase".
+ * Implements the decision-making logic for issuing orders during the Orders Issuing Phase.
+ * 
+ * This method is called in round-robin fashion by the game engine.
+ * Each call issues ONE order and may set the done flag.
+ * 
+ * Order Priority (as per assignment requirements):
+ * 1. DEPLOY orders - issued as long as reinforcement pool has armies
+ * 2. ADVANCE orders - move armies to defend own territories or attack enemy territories
+ * 3. CARD orders - play one card from hand to issue corresponding order
+ * 
+ * The method uses:
+ * - toDefend(): Returns list of own territories to defend in priority
+ * - toAttack(): Returns list of neighboring enemy territories to attack in priority
+ * 
+ * @param engine Pointer to the game engine for accessing game state
  */
 void Player::issueOrder(GameEngine* engine)
 {
     cout << "Player " << name << " issuing an order..." << endl;
 
+    // Check if player has exhausted all possible actions
+    // If no armies, no territories, and no cards, mark as done
     if (reinforcementPool <= 0 && (territories->empty() || (toDefend().empty() && toAttack().empty())) 
         && hand->getAllCards().empty())
     {
@@ -266,18 +281,26 @@ void Player::issueOrder(GameEngine* engine)
         return;
     }
 
-    // 1. Deploy orders while reinforcements remain
+    // PRIORITY 1: DEPLOY ORDERS
+    // "As long as the player has army units in their reinforcement pool,
+    // it will issue a deploy order and no other order."
     if (reinforcementPool > 0)
     {
+        // Determine how many armies to deploy this turn 
         int deployAmount = std::min(3, reinforcementPool);
 
+        // Select target territory from toDefend() list
+        // Deploy on territories that need defending in priority
         Territory* target = nullptr;
-        auto defendList = toDefend();
-        if (!defendList.empty())
-            target = defendList.front();
-        else if (!territories->empty())
-            target = territories->at(0);
+        auto defendList = toDefend(); // Get priority defense territories
 
+        if (!defendList.empty())
+            target = defendList.front(); // Use highest priority defense territory
+
+        else if (!territories->empty())
+            target = territories->at(0); // Fallback to any owned territory
+
+        // Issue the deploy order if valid target found
         if (target)
         {
             cout << name << " => DEPLOY on " << target->getName()
@@ -285,6 +308,7 @@ void Player::issueOrder(GameEngine* engine)
             orders->addOrder(new Deploy(this, target, deployAmount));
         }
 
+        // Deduct deployed armies from reinforcement pool
         reinforcementPool -= deployAmount;
         if (reinforcementPool > 0) {
             // still have more to deploy later
@@ -292,15 +316,20 @@ void Player::issueOrder(GameEngine* engine)
         }
     }
 
-    // 2. Advance once per round
+    // PRIORITY 2: ADVANCE ORDERS
+    // "Once it has deployed all its available army units, 
+    // it can proceed with other kinds of orders."
     {
-        auto defendList = toDefend();
-        auto attackList = toAttack();
+        auto defendList = toDefend(); // Own territories to defend
+        auto attackList = toAttack(); // Enemy territories to attack
 
+        // Case A: Advance to ATTACK enemy territory
+        // "move army units from one of its own territories to a neighboring 
+        // enemy territory to attack them"
         if (!defendList.empty() && !attackList.empty())
         {
-            Territory* src = defendList.front();
-            Territory* tgt = attackList.front();
+            Territory* src = defendList.front(); // Source: own territory
+            Territory* tgt = attackList.front(); // Target: enemy territory
 
             cout << name << " => ADVANCE (attack)" << endl;
             orders->addOrder(new Advance(this, src, tgt, 1));
@@ -308,37 +337,45 @@ void Player::issueOrder(GameEngine* engine)
             return;
         }
 
+        // Case B: Advance to DEFEND own territory
+        // "move army units from one of its own territory to another of its 
+        // own territories in order to defend it"
         if (defendList.size() >= 2)
         {
-            Territory* src = defendList[0];
-            Territory* tgt = defendList[1];
+            Territory* src = defendList[0]; // Source: own territory
+            Territory* tgt = defendList[1]; // Target: another own territory
 
             cout << name << " => ADVANCE (defend)" << endl;
             orders->addOrder(new Advance(this, src, tgt, 1));
-            DoneIssuingOrders = true;
+            DoneIssuingOrders = true; // After one advance, done for this round
             return;
         }
     }
 
-    // 3. Play one card if available
+    // PRIORITY 3. CARD ORDERS
+    // "The player uses one of the cards in their hand to issue an order 
+    // that corresponds to the card in question."
     if (!hand->getAllCards().empty() && !hasPlayedCardThisRound)
     {
         Card* card = hand->getAllCards().back();
         cout << name << " => plays a card" << endl;
 
+        // Play the card - this creates an order corresponding to the card type
         Order* cardOrder = card->play(this);
         if (cardOrder)
             orders->addOrder(cardOrder);
 
+        // Remove card from hand (it's been played)
         hand->removeLastCard();
-        hasPlayedCardThisRound = true;
+        hasPlayedCardThisRound = true; // Prevent multiple cards per round
 
         // after playing one card, done for now
         DoneIssuingOrders = true;
         return;
     }
 
-    // 4. nothign left => DONE
+    // PRIORITY 4: NO MORE ACTIONS
+    // Player has no reinforcements, no valid advance moves, and no cards
     cout << "Player " << name << " => done issuing orders." << endl;
     DoneIssuingOrders = true;
 }

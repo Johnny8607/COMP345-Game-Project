@@ -631,44 +631,57 @@ void GameEngine::mainGameLoop()
 
 /**
  * Implements the reinforcement phase logic
+ * 
+ * Each player receives reinforcement armies based on:
+ * 1. Territory ownership: floor(territories_owned / 3)
+ * 2. Continent control: bonus value for each fully-owned continent
+ * 3. Minimum guarantee: at least 3 armies per turn
+
  */
 void GameEngine::reinforcementPhase() {
     std::cout << "--- Reinforcement Phase ---" << std::endl;
     for (Player* p : players) {
-        // 1. Armies for territories
+        // 1.Calculate territory-based reinforcements (territories owned / 3, rounded down)
         int terrBonus = static_cast<int>(std::floor(p->getTerritories()->size() / 3.0));
         
-        // 2. Armies for continents
+        // 2.Calculate continent control bonuses
         int contBonus = 0;
         if (map && map->getContinents()) {
+            // Check if player owns entire continents
             for (Continent* c : *map->getContinents()) {
+
+                // Skip null continents
                 if (!c) {
                     continue;
                 }
 
+                // Check if player owns all territories in continent 
                 auto* territories = c->getTerritories();
                 if (!territories || territories->empty()) {
                     continue;
                 }
 
                 bool ownsAll = true;
-
+                
+                // Check each territory in the continent
                 for (Territory* t : *territories) {
                     if (!t || t->getOwner() != p) {
                         ownsAll = false;
                         break;
                     }
                 }
-
+                
+                // Add continent's control value if player owns entire continent
                 if (ownsAll) {
                     contBonus += c->getControlValue();
                 }
             }
         }
         
-        // 3. Total (min 3) 
+        // Apply minimum reinforcement rule: at least 3 armies per turn
         int total = std::max(3, terrBonus + contBonus);
-        p->addToReinforcementPool(total); // "placed in the player's reinforcement pool" 
+        // Place reinforcements in player's reinforcement pool
+        p->addToReinforcementPool(total);
 
         std::cout << "Reinforcement -> " << p->getName()
             << " : terr=" << terrBonus
@@ -679,96 +692,157 @@ void GameEngine::reinforcementPhase() {
 
 /**
  * Implements the order issuing phase logic
+ * 
+ * Players issue orders in round-robin fashion by calling Player::issueOrder().
+ * Each player's issueOrder() method is called repeatedly until all players
+ * have signified they are done issuing orders for this turn.
+ * 
+ * Process:
+ * 1. Reset all players' "done issuing orders" flags
+ * 2. Loop through players in round-robin fashion
+ * 3. Each player's issueOrder() is called, which issues order(s) and may set done flag
+ * 4. Phase ends when all players have set their done flag to true
  */
 void GameEngine::issueOrdersPhase() {
     std::cout << "--- Issuing Orders Phase ---" << std::endl;
     
-    // 1. Reset all player "done" flags to false
+    // 1. Reset all player flags at the start of the phase
+    // This ensures each player can issue orders for this turn
     for (Player* p : players) {
         p->hasPlayedCardThisRound = false;
         p->setDoneIssuingOrders(false);
     }
 
-    // 2. Loop in round-robin until all players are done
+    // 2. Round-robin order issuing loop
+    // Continue until all players have signified they are done
     int playersDone = 0;
     while (playersDone < players.size())
     {
-        playersDone = 0; // Reset count each full round
+        playersDone = 0; // Reset counter for each full round
         
-        // "called in round-robin fashion across all players"
+        // 3. Call issueOrder() in round-robin fashion across all players
+        // Each player issues ONE order per iteration
         for (Player* p : players) {
+            // Only call issueOrder() if player still has orders to issue
             if (!p->isDoneIssuingOrders()) {
                 p->issueOrder(this); // Player issues one order OR sets flag
             }
+            // Count how many players are done after this round
             if (p->isDoneIssuingOrders()) { // Check if player set their flag
                 playersDone++;
             }
         }
-    } // "This phase ends when all players have signified" 
+    } // Loop continues until playersDone == players.size()
     std::cout << "All players have issued orders." << std::endl;
 }
 
+/**
+ * Implements the orders execution phase logic.
+ * 
+ * Executes all players' orders in round-robin fashion with the following rules:
+ * 1. ALL deploy orders are executed FIRST (across all players)
+ * 2. Then ALL other orders are executed (in round-robin)
+ * 3. Players who conquered a territory receive a card
+ * 4. All order lists are cleared after execution
+ * 
+ * Process:
+ * - Round-robin means taking the next order from each player's list in sequence
+ * - Each order is executed via its execute() method (which validates then enacts)
+ * - Orders record their effects internally during execution
+ * 
+ */
 void GameEngine::executeOrdersPhase() {
     std::cout << "--- Executing Orders Phase ---" << std::endl;
 
-    // 1. Execute all DEPLOY orders first (round-robin)
-    bool anyExecuted = true;
-    while (anyExecuted) {
-        anyExecuted = false;
+    // Step 1: Execute all DEPLOY orders first (round-robin)
+    std::cout << "\n=== Executing Deploy Orders ===" << std::endl;
+
+    bool anyDeployExecuted = true;
+    while (anyDeployExecuted) {
+        anyDeployExecuted = false; // Reset flag for this round
+
+        // Round-robin through all players
         for (Player* p : players) {
+            // Skip null players or players with no orders
             if (!p || !p->getOrders()) continue;
 
+            // Get reference to player's order list
             auto& vector = p->getOrders()->getOrders();
+
+            // Search for the first deploy order in this player's list
             for (size_t i = 0; i < vector.size(); ++i) {
                 Order* order = vector[i];
+
+                // Check if this is a deploy order   
                 if (order && order->getLabel() == "Deploy") {
                     // executes + validates internally
                     order->execute();
+                    
+                    // Clean up: delete the order and remove from list
                     delete order;
                     vector.erase(vector.begin() + i);
-                    anyExecuted = true;
-                    // move to next player
+                    anyDeployExecuted = true;
+                    
+                    // Move to next player after executing one deploy
                     break;
                 }
             }
         }
     }
 
-    // 2. Execute all remaining orders
-    anyExecuted = true;
-    while (anyExecuted) {
-        anyExecuted = false;
+    // STEP 2: Execute all remaining orders (non-deploy) in round-robin
+    // "This goes on in round-robin fashion across the players 
+    // until all the players' orders have been executed"
+    std::cout << "\n=== Executing Other Orders ===" << std::endl;
+
+    bool anyOrderExecuted = true;
+    while (anyOrderExecuted) {
+        anyOrderExecuted = false;
         for (Player* p : players) {
             if (!p || !p->getOrders()) continue;
 
+            // Get reference to player's order list
             auto& vec = p->getOrders()->getOrders();
+
+            // Execute the first non-deploy order for this player
             for (size_t i = 0; i < vec.size(); ++i) {
                 Order* o = vec[i];
+                // Skip deploy orders
+                // Execute any other order type
                 if (o && o->getLabel() != "Deploy") {
+                    // Execute the order (validates internally, then enacts)
                     o->execute();
+
+                    // Clean up: delete the order and remove from list
                     delete o;
                     vec.erase(vec.begin() + i);
-                    anyExecuted = true;
+                    anyOrderExecuted = true;
                     break;
                 }
             }
         }
     }
 
-    // 3. Award cards for successful conquests
+    // STEP 3: Award cards for successful conquests
     for (Player* p : players) {
+        // Check if player conquered a territory this turn
         if (p->hasConqueredTerritory()) {
+            
+            // Draw a card from the deck
             if (deck) {
                 Card* reward = deck->draw();
+
+                // Add card to player's hand
                 if (reward && p->getHand()) {
                     p->getHand()->addCard(reward);
                     std::cout << p->getName() << " received a card for conquering this turn.\n";
                 }
             }
+            // Reset conquest flag for next turn
             p->setConqueredTerritory(false);
         }
 
-        // Clean up leftover orders
+        // STEP 4: Clear any remaining orders from player's list
         if (p->getOrders()) {
             p->getOrders()->clear();
         }
