@@ -1,0 +1,15 @@
+[continents]
+NorthAmerica=5
+SouthAmerica=2
+
+[countries]
+1 Alaska 1 0 0
+2 Alberta 1 0 0
+3 Brazil 2 0 0
+4 Peru 2 0 0
+
+[borders]
+1 2
+2 1
+3 4
+4 3

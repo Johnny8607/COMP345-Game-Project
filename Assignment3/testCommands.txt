@@ -1,0 +1,4 @@
+loadmap testmap.txt
+validatemap
+addplayer John
+gamestart
