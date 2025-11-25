@@ -9,6 +9,7 @@ class Map;
 class Player;
 class Deck;
 class MapLoader;
+struct TournamentParams;
 
 class GameEngine : public ILoggable , public Subject
 {
@@ -73,6 +74,7 @@ public:
     static void setNeutralPlayer(Player* p);
     void addPlayer(Player* player);               // Register a new player
     void simulateStartup();
+    void runTournament(const TournamentParams& params);
 
     
     
@@ -116,6 +118,9 @@ private:
      * @brief Removes players with no territories from the game.
      */
     void removeEliminatedPlayers();
+
+    std::string playSingleGame(int maxTurns);
+    void resetGameState();
 };
 
 #endif

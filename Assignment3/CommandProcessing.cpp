@@ -1,6 +1,8 @@
 #include "CommandProcessing.h"
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 // ================================================================
 // CommandProcessor Implementation
@@ -36,6 +38,48 @@ CommandProcessor::~CommandProcessor() {
     delete currentState;
 }
 
+static std::vector<std::string> split(const std::string& s, char delim) {
+    std::vector<std::string> elems;
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+static TournamentParams parseTournament(const std::string& cmd) {
+    TournamentParams p;
+    std::stringstream ss(cmd);
+    std::string token;
+
+    ss >> token;
+
+    while (ss >> token) {
+        if (token == "-M") {
+            ss >> token;
+            p.maps = split(token, ',');
+        } else if (token == "-P") {
+            ss >> token;
+            p.strategies = split(token, ',');
+        } else if (token == "-G") {
+            ss >> p.games;
+        } else if (token == "-D") {
+            ss >> p.maxTurns;
+        }
+    }
+
+    return p;
+}
+
+static bool validateTournamentParams(const TournamentParams& p) {
+    if (p.maps.size() < 1 || p.maps.size() > 5) return false;
+    if (p.strategies.size() < 2 || p.strategies.size() > 4) return false;
+    if (p.games < 1 || p.games > 5) return false;
+    if (p.maxTurns < 10 || p.maxTurns > 50) return false;
+    return true;
+}
+
 void CommandProcessor::readCommand() {
     std::string cmdStr;
     while (true) {
@@ -47,6 +91,24 @@ void CommandProcessor::readCommand() {
         Command* cmd = new Command(cmdStr);
 
         if (validate(cmdStr)) {
+            if (cmdStr.rfind("tournament", 0) == 0) {
+                TournamentParams params = parseTournament(cmdStr);
+
+                if (!validateTournamentParams(params)) {
+                    cmd->saveEffect("[ERROR] Invalid tournament parameters");
+                    saveCommand(cmd);
+                    std::cout << *cmd << std::endl;
+                    continue;
+                }
+
+                cmd->setTournamentParams(params);
+                cmd->saveEffect("[INFO] Tournament command accepted");
+                saveCommand(cmd);
+                *currentState = "tournament";
+                std::cout << *cmd << std::endl;
+                continue;
+            }
+
             cmd->saveEffect("[INFO] Command accepted");
             saveCommand(cmd);
 
@@ -76,8 +138,10 @@ Command* CommandProcessor::getCommand(size_t index) const {
 }
 
 bool CommandProcessor::validate(const std::string& command) const {
-    if (*currentState == "start")
+    if (*currentState == "start") {
+        if (command.rfind("tournament", 0) == 0) return true;
         return command.rfind("loadmap", 0) == 0 || command == "replay" || command == "quit";
+    }
     if (*currentState == "maploaded")
         return command == "validatemap" || command == "quit";
     if (*currentState == "mapvalidated")

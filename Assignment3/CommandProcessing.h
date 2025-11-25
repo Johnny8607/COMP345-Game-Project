@@ -12,6 +12,9 @@
  *
  * Reads commands from console, validates them, stores them, and tracks game state.
  */
+
+struct TournamentParams;
+
 class CommandProcessor : public ILoggable, public Subject{
 public:
     // Rule of Three

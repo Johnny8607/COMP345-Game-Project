@@ -16,6 +16,7 @@
 #include "Hand.h"
 #include "Orders.h"
 #include "GameEngine.h"
+#include "CommandProcessing.h"
 
 Player* GameEngine::neutralPlayer = nullptr; // Define static member neutralPlayer
 
@@ -898,5 +899,202 @@ void GameEngine::simulateStartup()
     transition("assign reinforcement");
 
     std::cout << "=== Simulated Startup Complete ===" << std::endl;
+}
+
+void GameEngine::resetGameState() {
+    if (map) {
+        delete map;
+        map = nullptr;
+    }
+
+    if (deck) {
+        delete deck;
+        deck = nullptr;
+    }
+
+    for (Player* p : players) {
+        delete p;
+    }
+    players.clear();
+
+    // Reset state
+    currentState = "start";
+}
+
+std::string GameEngine::playSingleGame(int maxTurns) {
+    int turn = 1;
+    transition("assign reinforcement");
+
+    while (turn <= maxTurns) {
+        std::cout << "\n--- [Tournament] Turn " << turn << " ---" << std::endl;
+
+        // 1. Reinforcement
+        reinforcementPhase();
+
+        // 2. Issue orders
+        transition("issue orders");
+        issueOrdersPhase();
+
+        // 3. Execute orders
+        transition("execute orders");
+        executeOrdersPhase();
+
+        // 4. Remove eliminated players
+        removeEliminatedPlayers();
+
+        // 5. Win check
+        if (checkWinCondition()) {
+            transition("win");
+            if (!players.empty()) {
+                return players[0]->getName();
+            } else {
+                return "Draw";
+            }
+        }
+
+        transition("assign reinforcement");
+        ++turn;
+    }
+
+    // Max turns reached => draw
+    return "Draw";
+}
+
+void GameEngine::runTournament(const TournamentParams& params) {
+    // M maps, P strategies, G games per map, D max turns
+    const std::vector<std::string>& maps = params.maps;
+    const std::vector<std::string>& strategies = params.strategies;
+    int G = params.games;
+    int D = params.maxTurns;
+
+    size_t M = maps.size();
+    size_t P = strategies.size();
+
+    // Results table: M x G
+    std::vector<std::vector<std::string>> results(
+        M, std::vector<std::string>(G, "Draw")
+    );
+
+    for (size_t m = 0; m < M; ++m) {
+        for (int g = 0; g < G; ++g) {
+            std::cout << "\n=== [Tournament] Map " << (m + 1)
+                      << " (" << maps[m] << "), Game " << (g + 1) << " ===" << std::endl;
+
+            // Fresh game state per game
+            resetGameState();
+
+            // 1. Load and validate map
+            MapLoader loader(maps[m]);
+            map = loader.load();
+
+            if (!map) {
+                std::cout << "[Tournament] ERROR: Could not load map: " << maps[m]
+                          << ". Marking result as Draw." << std::endl;
+                results[m][g] = "Draw";
+                continue;
+            }
+
+            if (!map->validate()) {
+                std::cout << "[Tournament] ERROR: Map not valid: " << maps[m]
+                          << ". Marking result as Draw." << std::endl;
+                results[m][g] = "Draw";
+                continue;
+            }
+
+            // 2. Create deck
+            deck = new Deck();
+            CardType types[] = {
+                CardType::Bomb,
+                CardType::Reinforcement,
+                CardType::Blockade,
+                CardType::Airlift,
+                CardType::Diplomacy
+            };
+
+            // Fill deck with some cards
+            for (int i = 0; i < 50; ++i) {
+                deck->addCard(new Card(types[i % 5]));
+            }
+
+            // 3. Create one Player per strategy
+            players.clear();
+            for (size_t p = 0; p < P; ++p) {
+                // TODO: change once PlayerStrategy IS IMPLEMENTED
+                // Name the player with the strategy name so winner shows strategy
+                Player* player = new Player(strategies[p]);
+                players.push_back(player);
+
+                // TODO: ONCE PlayerStrategy IS IMPLEMENTED
+                // SET THE STRATEGIES HERE BASED ON strategies[p]
+            }
+
+            // 4. Distribute territories & determine play order
+            distributeTerritories();
+            shufflePlayerOrder();
+
+            // 5. Give 50 reinforcements to each player
+            for (Player* pl : players) {
+                pl->addToReinforcementPool(50);
+            }
+
+            // 6. Ensure enough cards for 2 per player
+            int needed = static_cast<int>(players.size()) * 2;
+            if (deck->size() < needed) {
+                int deficit = needed - deck->size();
+                for (int i = 0; i < deficit; ++i) {
+                    deck->addCard(new Card(types[i % 5]));
+                }
+            }
+
+            // 7. Each player draws 2 cards
+            for (Player* pl : players) {
+                for (int i = 0; i < 2; ++i) {
+                    Card* c = deck->draw();
+                    if (c && pl->getHand()) {
+                        pl->getHand()->addCard(c);
+                    }
+                }
+            }
+
+            // 8. Play a single game up to D turns
+            std::string winner = playSingleGame(D);
+            results[m][g] = winner;
+
+            std::cout << "[Tournament] Result for Map " << (m + 1)
+                      << ", Game " << (g + 1) << ": " << winner << std::endl;
+        }
+    }
+
+    // Print final tournament summary
+    std::cout << "\nTournament mode:" << std::endl;
+
+    std::cout << "M: ";
+    for (size_t i = 0; i < M; ++i) {
+        std::cout << maps[i];
+        if (i + 1 < M) std::cout << ", ";
+    }
+
+    std::cout << "\nP: ";
+    for (size_t i = 0; i < P; ++i) {
+        std::cout << strategies[i];
+        if (i + 1 < P) std::cout << ", ";
+    }
+
+    std::cout << "\nG: " << G;
+    std::cout << "\nD: " << D << std::endl;
+
+    std::cout << "Results:\n\t";
+    for (int g = 0; g < G; ++g) {
+        std::cout << "Game " << (g + 1) << "\t";
+    }
+    std::cout << "\n";
+
+    for (size_t m = 0; m < M; ++m) {
+        std::cout << "Map " << (m + 1) << "\t";
+        for (int g = 0; g < G; ++g) {
+            std::cout << results[m][g] << "\t";
+        }
+        std::cout << "\n";
+    }
 }
 
