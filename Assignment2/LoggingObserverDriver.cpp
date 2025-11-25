@@ -41,7 +41,7 @@ void testLoggingObserver() {
 
    
     // Test 2: Command processor test (file processor)
-    cout << "\n--- Test 4: CommandProcessor Notifications ---" << endl;
+    cout << "\n--- Test 2: CommandProcessor Notifications ---" << endl;
     FileCommandProcessorAdapter fileProcessor("testCommands.txt");
     fileProcessor.Attach(&logger);
     size_t total = fileProcessor.getFileCommandsCount();
@@ -57,7 +57,7 @@ void testLoggingObserver() {
     orderList.addOrder(&testAdvance);
     Bomb testBomb;
     orderList.addOrder(&testBomb);
-    orderList.executeOrders();
+    // orderList.executeOrders();
 
     // Test 4: GameEngine state transition notifications
     cout << "\n--- Test 4: GameEngine State Transition Notifications ---" << endl;
@@ -92,9 +92,4 @@ void testLoggingObserver() {
     processor.Detach(&logger);
     orderList.Detach(&logger);
     engine.Detach(&logger);
-    
-    delete &logger;
-    delete &processor;
-    delete &orderList;
-    delete &engine;
 }

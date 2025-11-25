@@ -77,8 +77,7 @@ public:
     
     
     // Observer pattern implementation
-    std::string stringToLog() const override {
-    }
+    std::string stringToLog() const override;
 
 private:
     std::string currentState;

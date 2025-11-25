@@ -96,18 +96,11 @@ int main()
     pressEnterToContinue();
     
     
-    
+       // Start of assignment 2 part 5
     std::cout << "Testing Assignment 2 Part 5: Logging Observer" << std::endl;
     std::cout << "==============================\n" << std::endl;
     testLoggingObserver();
     pressEnterToContinue();
-
-    // Start of assignment 2 part 5
-    // std::cout << "Testing Assignment 2 Part 5: Game end" << std::endl;
-    // std::cout << "==============================\n"
-    //           << std::endl;
-    // testLoggingObserver()
-    // pressEnterToContinue();
 
     std::cout << "\nEnd of assignment 2 demo. Thank you for playing Risk Warzone!" << std::endl;
     // End of assignment 2 demo
