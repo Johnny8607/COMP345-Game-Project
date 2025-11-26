@@ -3,6 +3,7 @@
 #include "Map.h"
 #include "GameEngine.h"
 #include "LoggingObserver.h"
+#include "PlayerStrategies.h" //NEW for A3
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -330,8 +331,31 @@ void Deploy::execute() {
  * - Conquers territory if defender loses all armies.
  */
 void Advance::execute()  {  
-    if (!validate()) return;
-    cout << "Executing Advance from " << source->getName() << " ->" << target->getName() << " (Army number: " << armies << ")\n";
+    // NEW for A3 
+     // If target owner is Neutral, switch it to Aggressive
+        cout << "\n[EXECUTE] Advance from " 
+         << source->getName() << " -> " << target->getName()
+         << " (" << armies << " armies)\n";
+
+    // 1) Validate
+    if (!validate()) {
+        cout << "Advance invalid.\n";
+        return;
+    }
+
+    // 2) Neutral -> Aggressive if attacked
+    Player* defender = target->getOwner();
+    if (defender && defender != player && defender->getStrategy()) {
+        auto* neutralStrat = dynamic_cast<NeutralPlayerStrategy*>(defender->getStrategy());
+        if (neutralStrat) {
+            defender->setStrategy(new AggressivePlayerStrategy());
+            cout << ">>> " << defender->getName()
+                 << " was NEUTRAL and is now AGGRESSIVE after being attacked!\n";
+        }
+    }
+    
+    
+    
     source->setArmies(source->getArmies() - armies);
     // Friendly move
     if (target->getOwner() == player) {
