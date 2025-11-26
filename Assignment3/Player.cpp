@@ -4,6 +4,7 @@
 #include "Orders.h" // Orders, OrdersList
 #include "GameEngine.h"
 #include "Cards.h"
+#include "PlayerStrategies.h"   //NEW for A3
 #include <algorithm> // Operations, vector
 #include <random>
 
@@ -12,17 +13,26 @@ Player::Player(const std::string& name)
     : name(name), territories(new std::vector<Territory*>()), hand(new Hand()), orders(new OrdersList()),
       reinforcementPool(0),
       DoneIssuingOrders(false),
-      ConqueredTerritoryThisTurn(false)
-    {}
+      ConqueredTerritoryThisTurn(false),
+      strategy(nullptr)  //NEW for A3
+    {
+     //NEw for A3: Per assignment, Player must always have a strategy
+      setStrategy(new HumanPlayerStrategy());
+    }
 
 // Copy constructor for copying and creating from an existing player
 Player::Player(const Player& other)
     : name(other.name), territories(nullptr), hand(nullptr), orders(nullptr),
       reinforcementPool(other.reinforcementPool),
       DoneIssuingOrders(other.DoneIssuingOrders),
-      ConqueredTerritoryThisTurn(other.ConqueredTerritoryThisTurn)
+      ConqueredTerritoryThisTurn(other.ConqueredTerritoryThisTurn),
+      strategy(nullptr)//NEW for A3
     {
     copyFrom(other);
+        if (other.strategy) { //NEW for A3
+        strategy = other.strategy->clone();
+        if (strategy) strategy->setPlayer(this);
+    }
 }
 
 // Copy assignment operator for deep copying over an existing player
@@ -31,10 +41,19 @@ Player& Player::operator=(const Player& other) {
         clearData();
         name = other.name;
         copyFrom(other);
-    }
+        
+        // NEW for A3: Copy strategy
+        if (other.strategy) {
+            strategy = other.strategy->clone();
+            if (strategy) strategy->setPlayer(this);
+        } else {
+            strategy = nullptr;
+        }
+    
         reinforcementPool = other.reinforcementPool;
         DoneIssuingOrders = other.DoneIssuingOrders;
         ConqueredTerritoryThisTurn = other.ConqueredTerritoryThisTurn;
+    }
     return *this;
 }
 
@@ -58,6 +77,11 @@ void Player::clearData() {
     if (orders) {
         delete orders; 
         orders = nullptr; 
+    }
+
+    if (strategy) {  //NEW for A3
+        delete strategy;
+        strategy = nullptr;
     }
 }
 
@@ -95,6 +119,22 @@ void Player::addOrder(Order *order) {
 OrdersList* Player::getOrders() const {
     return orders;
 }
+
+// NEW for A3
+// Strategy methods
+void Player::setStrategy(PlayerStrategy* newStrategy) {
+    if (strategy) {
+        delete strategy;
+        strategy = nullptr;
+    }
+    strategy = newStrategy;
+    if (strategy) strategy->setPlayer(this);
+}
+
+PlayerStrategy* Player::getStrategy() const {
+    return strategy;
+}
+
 
 // Returns true if this player currently has a ceasefire agreement with `other`.
 bool Player::isCeasefireWith(Player* other) const {
@@ -149,34 +189,21 @@ void Player::playCard(Deck *deck) {
 void Player::addTerritory(Territory* territory) {
     if (!territory) return;
     territories->push_back(territory);
+    territory->setOwner(this); //New for A3
 }
 
+// New for A3
 // Return up to three first territories to defend from player list
 std::vector<Territory*> Player::toDefend() const {
-    std::vector<Territory*> selection;
-
-    // Check territories exist
-    if (!territories || territories->empty()) return selection;
-
-    // Select up to 3 territories from the start of territory list
-    for (size_t i = 0; i < territories->size() && i < 3; ++i) {
-        selection.push_back((*territories)[i]);
-    }
-    return selection;
+     if (strategy) return strategy->toDefend();
+    return {};
 }
 
+// New for A3
 // Return up to three territories to attack from player list after the first three
 std::vector<Territory*> Player::toAttack() const {
-    std::vector<Territory*> selection;
-
-    // Check territories exist
-    if (!territories || territories->empty()) return selection;
-
-    // Select up to 3 territories from the end of defending territory list
-    for (size_t i = 3; i < territories->size() && selection.size() < 3; ++i) {
-        selection.push_back((*territories)[i]);
-    }
-    return selection;
+   if (strategy) return strategy->toAttack();
+    return {};
 }
 
 void Player::issueOrder(const std::string& type)
@@ -251,96 +278,14 @@ void Player::setReinforcementPool(int value) {
 }
 
 /**
- * @brief The main decision-making method for a player.
- * This implements the logic described in the "Orders Issuing phase".
+ * NEW for A3
+ * @brief Player class does not implement behavior
+ * simply delegates to the PlayerStrategy
  */
 void Player::issueOrder(GameEngine* engine)
 {
-    cout << "Player " << name << " issuing an order..." << endl;
-
-    if (reinforcementPool <= 0 && (territories->empty() || (toDefend().empty() && toAttack().empty())) 
-        && hand->getAllCards().empty())
-    {
-        cout << "Player " << name << " has no more actions to issue." << endl;
-        DoneIssuingOrders = true;
-        return;
-    }
-
-    // 1. Deploy orders while reinforcements remain
-    if (reinforcementPool > 0)
-    {
-        int deployAmount = std::min(3, reinforcementPool);
-
-        Territory* target = nullptr;
-        auto defendList = toDefend();
-        if (!defendList.empty())
-            target = defendList.front();
-        else if (!territories->empty())
-            target = territories->at(0);
-
-        if (target)
-        {
-            cout << name << " => DEPLOY on " << target->getName()
-                 << " (" << deployAmount << " armies)" << endl;
-            orders->addOrder(new Deploy(this, target, deployAmount));
-        }
-
-        reinforcementPool -= deployAmount;
-        if (reinforcementPool > 0) {
-            // still have more to deploy later
-            return; 
-        }
-    }
-
-    // 2. Advance once per round
-    {
-        auto defendList = toDefend();
-        auto attackList = toAttack();
-
-        if (!defendList.empty() && !attackList.empty())
-        {
-            Territory* src = defendList.front();
-            Territory* tgt = attackList.front();
-
-            cout << name << " => ADVANCE (attack)" << endl;
-            orders->addOrder(new Advance(this, src, tgt, 1));
-            DoneIssuingOrders = true; // after one advance, stop for this round
-            return;
-        }
-
-        if (defendList.size() >= 2)
-        {
-            Territory* src = defendList[0];
-            Territory* tgt = defendList[1];
-
-            cout << name << " => ADVANCE (defend)" << endl;
-            orders->addOrder(new Advance(this, src, tgt, 1));
-            DoneIssuingOrders = true;
-            return;
-        }
-    }
-
-    // 3. Play one card if available
-    if (!hand->getAllCards().empty() && !hasPlayedCardThisRound)
-    {
-        Card* card = hand->getAllCards().back();
-        cout << name << " => plays a card" << endl;
-
-        Order* cardOrder = card->play(this);
-        if (cardOrder)
-            orders->addOrder(cardOrder);
-
-        hand->removeLastCard();
-        hasPlayedCardThisRound = true;
-
-        // after playing one card, done for now
-        DoneIssuingOrders = true;
-        return;
-    }
-
-    // 4. nothign left => DONE
-    cout << "Player " << name << " => done issuing orders." << endl;
-    DoneIssuingOrders = true;
+   if (strategy)
+        strategy->issueOrder(engine);
 }
 
 
