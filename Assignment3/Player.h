@@ -20,6 +20,7 @@ class Hand;
 class OrdersList;
 class Deck;
 class GameEngine;
+class PlayerStrategy; // NEW for A3
 
 // Player class following the Rule of Three for careful memory management
 class Player { 
@@ -40,6 +41,10 @@ public:
     void addOrder(Order* order); // Function to add a new order to player's order list
     OrdersList* getOrders() const; // Pointer to player's orders list
     void playCard(Deck* deck);
+
+    // NEW for A3: Assigns a strategy to this Player
+    void setStrategy(PlayerStrategy* newStrategy);
+    PlayerStrategy* getStrategy() const;
 
     // Add territory pointer to player's territory list
     void addTerritory(Territory* territory);
@@ -87,7 +92,7 @@ private:
     bool DoneIssuingOrders;                 // Flag indicating if player is done issuing orders
     bool ConqueredTerritoryThisTurn;        // Flag indicating if player conquered a territory this turn
     std::vector<Player*> ceasefirePlayers;  // Used to track players this player is in ceasefire with
-
+    PlayerStrategy* strategy;               //NEW dor A3: Pointer to the PlayerStrategy used by this player
     // To delete safely all player object members using dynamic memory
     void clearData();
 
