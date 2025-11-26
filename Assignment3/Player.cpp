@@ -4,45 +4,48 @@
 #include "Orders.h" // Orders, OrdersList
 #include "GameEngine.h"
 #include "Cards.h"
-#include "PlayerStrategies.h"   //NEW for A3
+#include "PlayerStrategies.h"   // CRITICAL: Add strategy include
 #include <algorithm> // Operations, vector
 #include <random>
+#include <iostream>
 
-// Constructor using 'new' dynamic memory allocation for name, territories, hand, orders
+using namespace std;
+
+// Constructor
 Player::Player(const std::string& name)
     : name(name), territories(new std::vector<Territory*>()), hand(new Hand()), orders(new OrdersList()),
       reinforcementPool(0),
       DoneIssuingOrders(false),
       ConqueredTerritoryThisTurn(false),
-      strategy(nullptr)  //NEW for A3
+      strategy(nullptr)  // *** FIX: Initialize strategy to nullptr to prevent conflicts ***
     {
-     //NEw for A3: Per assignment, Player must always have a strategy
-      setStrategy(new HumanPlayerStrategy());
+     // Strategy is now set explicitly later via setStrategy(), either by Driver or GameEngine::runTournament.
     }
 
-// Copy constructor for copying and creating from an existing player
+// Copy constructor
 Player::Player(const Player& other)
     : name(other.name), territories(nullptr), hand(nullptr), orders(nullptr),
       reinforcementPool(other.reinforcementPool),
       DoneIssuingOrders(other.DoneIssuingOrders),
       ConqueredTerritoryThisTurn(other.ConqueredTerritoryThisTurn),
-      strategy(nullptr)//NEW for A3
+      strategy(nullptr)
     {
     copyFrom(other);
-        if (other.strategy) { //NEW for A3
+        if (other.strategy) {
+        // Deep copy the strategy object
         strategy = other.strategy->clone();
         if (strategy) strategy->setPlayer(this);
     }
 }
 
-// Copy assignment operator for deep copying over an existing player
+// Copy assignment operator
 Player& Player::operator=(const Player& other) {
     if (this != &other) {
-        clearData();
+        clearData(); // Clears all dynamic members, including old strategy
         name = other.name;
         copyFrom(other);
         
-        // NEW for A3: Copy strategy
+        // Deep copy strategy
         if (other.strategy) {
             strategy = other.strategy->clone();
             if (strategy) strategy->setPlayer(this);
@@ -57,7 +60,7 @@ Player& Player::operator=(const Player& other) {
     return *this;
 }
 
-// Destructor for Player class to clean up allocated memory
+// Destructor
 Player::~Player() {
     clearData();
 }
@@ -79,8 +82,8 @@ void Player::clearData() {
         orders = nullptr; 
     }
 
-    if (strategy) {  //NEW for A3
-        delete strategy;
+    if (strategy) { 
+        delete strategy; // *** CRITICAL CLEANUP STEP ***
         strategy = nullptr;
     }
 }
@@ -89,9 +92,9 @@ void Player::clearData() {
 void Player::copyFrom(const Player& other) {
     // Copy over pointers vector
     territories = new std::vector<Territory*>(*other.territories);
-    // Copy over hand
+    // Copy over hand (assuming Hand copy constructor performs deep copy of cards)
     hand = new Hand(*other.hand);
-    // Fresh blank orders list
+    // Fresh blank orders list (orders are temporary, not deep-copied)
     orders = new OrdersList();
 }
 
@@ -120,15 +123,16 @@ OrdersList* Player::getOrders() const {
     return orders;
 }
 
-// NEW for A3
-// Strategy methods
+// Strategy Management: *** ENSURES CLEANUP OF OLD STRATEGY ***
 void Player::setStrategy(PlayerStrategy* newStrategy) {
     if (strategy) {
-        delete strategy;
-        strategy = nullptr;
+        delete strategy; // Delete the old strategy before replacing
     }
     strategy = newStrategy;
-    if (strategy) strategy->setPlayer(this);
+    if (strategy) {
+        // Assuming PlayerStrategy has a setPlayer method to set the back-pointer
+        strategy->setPlayer(this); 
+    }
 }
 
 PlayerStrategy* Player::getStrategy() const {
@@ -144,7 +148,6 @@ bool Player::isCeasefireWith(Player* other) const {
 }
 
 // Adds a ceasefire agreement with another player, if not already present.
-// Prevents duplicate entries in the ceasefire list.
 void Player::addCeasefire(Player* other) {
     if (!isCeasefireWith(other))
         ceasefirePlayers.push_back(other);
@@ -156,7 +159,6 @@ void Player::clearCeasefire() {
 }
 
 // Checks if the target territory is adjacent to any territory owned by this player.
-// Returns true if at least one owned territory is adjacent to the target.
 bool Player::hasAdjacentTerritory(Territory* target) const {
     for (auto* t : *territories) {
         if (t->isAdjacentTo(target))
@@ -192,30 +194,28 @@ void Player::addTerritory(Territory* territory) {
     territory->setOwner(this); //New for A3
 }
 
-// New for A3
-// Return up to three first territories to defend from player list
-std::vector<Territory*> Player::toDefend() const {
+// Core Game Methods: DELEGATE TO STRATEGY
+// Return territories to defend. Delegates to the PlayerStrategy.
+std::vector<Territory*> Player::toDefend() {
      if (strategy) return strategy->toDefend();
     return {};
 }
 
-// New for A3
-// Return up to three territories to attack from player list after the first three
-std::vector<Territory*> Player::toAttack() const {
+// Return territories to attack. Delegates to the PlayerStrategy.
+std::vector<Territory*> Player::toAttack() {
    if (strategy) return strategy->toAttack();
     return {};
 }
 
+// OBSOLETE METHOD: ONLY KEPT FOR OLD DRIVER COMPATIBILITY
 void Player::issueOrder(const std::string& type)
 {
-    // ONLY HERE TO MAKE PlayerDriver COMPILE
+    // This is the old stub. The method below is the correct one.
     if (type == "deploy") {
         cout << name << " issues DEPLOY (stub)" << endl;
-        orders->addOrder(new Deploy()); // stub only
     }
     else if (type == "advance") {
         cout << name << " issues ADVANCE (stub)" << endl;
-        orders->addOrder(new Advance());
     }
 }
 
@@ -272,22 +272,24 @@ void Player::setConqueredTerritory(bool conquered) {
  * Set the number of armies available in the player's reinforcement pool.
  * @param value The new number of reinforcement armies for the player
  *
-*/
+ */
 void Player::setReinforcementPool(int value) {
     reinforcementPool = value;
 }
 
 /**
- * NEW for A3
- * @brief Player class does not implement behavior
- * simply delegates to the PlayerStrategy
+ * Delegate to Strategy: The Player delegates the order generation logic to its strategy.
  */
 void Player::issueOrder(GameEngine* engine)
 {
    if (strategy)
-        strategy->issueOrder(engine);
+         strategy->issueOrder(engine);
 }
 
+// Observer Pattern Implementation (Assuming Player inherits from ILoggable)
+std::string Player::stringToLog() const {
+    return "Player: " + name + " issued an order via " + (strategy ? strategy->getName() : "Unknown") + " strategy.";
+}
 
 // Stream insertion for help printing Player object in specified format
 std::ostream& operator<<(std::ostream& os, const Player& player) {

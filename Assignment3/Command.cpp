@@ -1,22 +1,44 @@
 #include "Command.h"
 
 // Constructor
-Command::Command(const std::string& command) : command(command), effect("") {}
+Command::Command(const std::string& command) : command(command), effect(""), tournamentParams(nullptr) {}
 
-// Copy constructor
-Command::Command(const Command& other) : command(other.command), effect(other.effect) {}
+// Copy constructor (FIX: Deep copy tournamentParams)
+Command::Command(const Command& other) : command(other.command), effect(other.effect) {
+    if (other.tournamentParams) {
+        // Deep copy the struct data
+        tournamentParams = new TournamentParams(*other.tournamentParams);
+    } else {
+        tournamentParams = nullptr;
+    }
+}
 
-// Assignment operator
+// Assignment operator (FIX: Deep copy tournamentParams and cleanup)
 Command& Command::operator=(const Command& other) {
     if (this != &other) {
         command = other.command;
         effect = other.effect;
+        
+        // Cleanup existing pointer
+        if (tournamentParams) {
+            delete tournamentParams;
+            tournamentParams = nullptr;
+        }
+
+        // Deep copy the new pointer
+        if (other.tournamentParams) {
+            tournamentParams = new TournamentParams(*other.tournamentParams);
+        }
     }
     return *this;
 }
 
-// Destructor
-Command::~Command() {}
+// Destructor (FIX: Clean up tournamentParams)
+Command::~Command() {
+    if (tournamentParams) {
+        delete tournamentParams;
+    }
+}
 
 // Save effect string
 void Command::saveEffect(const std::string& effectStr) {

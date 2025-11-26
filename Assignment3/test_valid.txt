@@ -10,6 +10,6 @@ SouthAmerica=2
 
 [borders]
 1 2
-2 1
-3 4
+2 1 3    <-- ADDED: Link Alberta (2) to Brazil (3)
+3 4 2    <-- ADDED: Link Brazil (3) to Alberta (2)
 4 3
