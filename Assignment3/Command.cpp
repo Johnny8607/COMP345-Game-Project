@@ -3,7 +3,7 @@
 // Constructor
 Command::Command(const std::string& command) : command(command), effect(""), tournamentParams(nullptr) {}
 
-// Copy constructor (FIX: Deep copy tournamentParams)
+// Copy constructor 
 Command::Command(const Command& other) : command(other.command), effect(other.effect) {
     if (other.tournamentParams) {
         // Deep copy the struct data
@@ -13,7 +13,7 @@ Command::Command(const Command& other) : command(other.command), effect(other.ef
     }
 }
 
-// Assignment operator (FIX: Deep copy tournamentParams and cleanup)
+// Assignment operator 
 Command& Command::operator=(const Command& other) {
     if (this != &other) {
         command = other.command;
@@ -33,7 +33,7 @@ Command& Command::operator=(const Command& other) {
     return *this;
 }
 
-// Destructor (FIX: Clean up tournamentParams)
+// Destructor
 Command::~Command() {
     if (tournamentParams) {
         delete tournamentParams;

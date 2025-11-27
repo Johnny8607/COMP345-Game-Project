@@ -60,10 +60,7 @@ public:
     Map* getMap();
     Deck * getDeck() { return deck; }
 
-    /**
-     * @brief A placeholder for A2 Part 2.
-     * Manually sets up the game state so the main loop can run.
-     */
+    
     void startupPhase();
 
     void mainGameLoop();

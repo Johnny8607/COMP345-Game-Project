@@ -234,13 +234,9 @@ void GameEngine::processCommand(const std::string &command)
     }
 }
 
-/**
- * Validates if a command is valid for the current state
- * Part 5 Requirement: Validates commands according to state graph
- */
+
 bool GameEngine::isValidTransition(const std::string &command) const
 {
-    // Part 5 Requirement: Commands are validated according to the state diagram
     if (currentState == "start" && command == "loadmap")
         return true;
     if (currentState == "map loaded" && (command == "loadmap" || command == "validatemap"))
@@ -261,10 +257,7 @@ bool GameEngine::isValidTransition(const std::string &command) const
     return false;
 }
 
-/**
- * Transitions to a new state and displays the transition
- * Part 5 Requirement: State transitions as specified in the graph
- */
+
 void GameEngine::transition(const std::string &newState)
 {
     std::cout << "Transitioning from '" << currentState
@@ -1024,8 +1017,7 @@ void GameEngine::runTournament(const TournamentParams& params) {
                 Player* player = new Player(strategies[p]);
                 players.push_back(player);
 
-                // TODO: ONCE PlayerStrategy IS IMPLEMENTED
-                // SET THE STRATEGIES HERE BASED ON strategies[p]
+                
             }
 
             // 4. Distribute territories & determine play order

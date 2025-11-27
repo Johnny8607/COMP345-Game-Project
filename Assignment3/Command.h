@@ -27,7 +27,7 @@ public:
     explicit Command(const std::string& command);
     Command(const Command& other);
     Command& operator=(const Command& other);
-    ~Command(); // Must clean up tournamentParams
+    ~Command();
 
     // Save the effect of executing the command
     void saveEffect(const std::string& effect);
